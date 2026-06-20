@@ -38,6 +38,7 @@ type CardCornerMode = "rounded" | "square";
 type SidebarTab = "content" | "style";
 type TitleFontMode = "serif" | "kai" | "sans";
 type HighlightStyle = "underline" | "marker" | "border";
+type TextRange = { start: number; end: number };
 
 type PosterMetrics = {
   titleSize: number;
@@ -46,6 +47,7 @@ type PosterMetrics = {
   bodyLineHeight: number;
   bodyParagraphGap: number;
   titleLines: string[];
+  titleAccentRanges: TextRange[];
   titleStartY: number;
   separatorY: number;
   bodyTopY: number;
@@ -238,6 +240,19 @@ const TITLE_FONT_MODES: Record<
   }
 };
 
+function getTitleFontWeight(mode: TitleFontMode) {
+  return mode === "sans" ? 600 : 500;
+}
+
+function getTitleTracking(size: number, mode: TitleFontMode) {
+  const em = mode === "serif" ? 0.038 : mode === "kai" ? 0.026 : 0.018;
+  return size * em;
+}
+
+function getTitleLineHeightRatio(mode: TitleFontMode) {
+  return mode === "serif" ? 1.08 : mode === "kai" ? 1.1 : 1.06;
+}
+
 function parseInput(raw: string) {
   const normalized = raw.replace(/\r\n/g, "\n").trim();
   if (!normalized) return { paragraphs: [] as string[] };
@@ -337,9 +352,60 @@ function hexToRgba(hex: string, alpha: number) {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
+function mixHexColors(fromHex: string, toHex: string, ratio: number) {
+  const normalize = (value: string) => value.replace("#", "");
+  const from = normalize(fromHex);
+  const to = normalize(toHex);
+  if (from.length !== 6 || to.length !== 6) return toHex;
+
+  const mix = (start: number, end: number) => Math.round(start + (end - start) * ratio);
+  const fromRgb = [
+    Number.parseInt(from.slice(0, 2), 16),
+    Number.parseInt(from.slice(2, 4), 16),
+    Number.parseInt(from.slice(4, 6), 16)
+  ];
+  const toRgb = [
+    Number.parseInt(to.slice(0, 2), 16),
+    Number.parseInt(to.slice(2, 4), 16),
+    Number.parseInt(to.slice(4, 6), 16)
+  ];
+
+  return `rgb(${mix(fromRgb[0], toRgb[0])}, ${mix(fromRgb[1], toRgb[1])}, ${mix(fromRgb[2], toRgb[2])})`;
+}
+
 function resolveTitleFontFamily(mode: TitleFontMode, isLatin: boolean) {
   const config = TITLE_FONT_MODES[mode] ?? TITLE_FONT_MODES.serif;
   return isLatin ? config.latinFamily : config.family;
+}
+
+function parseTitleMarkup(raw: string) {
+  const ranges: TextRange[] = [];
+  let plainText = "";
+  let sourceCursor = 0;
+  let charCursor = 0;
+  const pattern = /\*\*([\s\S]+?)\*\*/g;
+
+  for (const match of raw.matchAll(pattern)) {
+    const matchIndex = match.index ?? 0;
+    const before = raw.slice(sourceCursor, matchIndex);
+    plainText += before;
+    charCursor += Array.from(before).length;
+
+    const emphasized = match[1] ?? "";
+    plainText += emphasized;
+    const emphasizedLength = Array.from(emphasized).length;
+    if (emphasized.trim()) {
+      ranges.push({ start: charCursor, end: charCursor + emphasizedLength });
+    }
+    charCursor += emphasizedLength;
+    sourceCursor = matchIndex + match[0].length;
+  }
+
+  plainText += raw.slice(sourceCursor);
+  return {
+    plainText,
+    accentRanges: ranges
+  };
 }
 
 function parseInlineMarkdown(text: string) {
@@ -477,12 +543,28 @@ function splitLatinRuns(text: string) {
   return text.match(/[A-Za-z0-9][A-Za-z0-9\s'&/.-]*|[^A-Za-z0-9]+/g) ?? [text];
 }
 
+function measureTrackedTitleSegment(segment: string, size: number, mode: TitleFontMode, isLatin: boolean) {
+  const context = getMeasureContext(`${getTitleFontWeight(mode)} ${size}px ${resolveTitleFontFamily(mode, isLatin)}`);
+  const chars = Array.from(segment);
+  const tracking = getTitleTracking(size, mode);
+  let width = 0;
+
+  chars.forEach((char, index) => {
+    width += context.measureText(char).width;
+    const nextChar = chars[index + 1];
+    if (nextChar && !/\s/.test(char) && !/\s/.test(nextChar)) {
+      width += tracking;
+    }
+  });
+
+  return width;
+}
+
 function measureTitleText(text: string, size: number, mode: TitleFontMode) {
   let width = 0;
   for (const segment of splitLatinRuns(text)) {
     const isLatin = /^[A-Za-z0-9\s'&/.-]+$/.test(segment);
-    const context = getMeasureContext(`700 ${size}px ${resolveTitleFontFamily(mode, isLatin)}`);
-    width += context.measureText(segment).width;
+    width += measureTrackedTitleSegment(segment, size, mode, isLatin);
   }
   return width;
 }
@@ -493,15 +575,41 @@ function drawTitleLine(
   x: number,
   y: number,
   size: number,
-  mode: TitleFontMode
+  mode: TitleFontMode,
+  options?: {
+    globalCharStart?: number;
+    accentRanges?: TextRange[];
+    normalColor?: string;
+    accentColor?: string;
+  }
 ) {
   let cursorX = x;
+  let globalCharIndex = options?.globalCharStart ?? 0;
+  const tracking = getTitleTracking(size, mode);
+  const titleWeight = getTitleFontWeight(mode);
   for (const segment of splitLatinRuns(line)) {
     const isLatin = /^[A-Za-z0-9\s'&/.-]+$/.test(segment);
-    context.font = `700 ${size}px ${resolveTitleFontFamily(mode, isLatin)}`;
-    context.fillText(segment, cursorX, y);
-    cursorX += context.measureText(segment).width;
+    context.font = `${titleWeight} ${size}px ${resolveTitleFontFamily(mode, isLatin)}`;
+    const chars = Array.from(segment);
+    chars.forEach((char, index) => {
+      const isAccent = Boolean(
+        options?.accentRanges?.some((range) =>
+          globalCharIndex >= range.start && globalCharIndex < range.end
+        ) &&
+        !/\s/.test(char)
+      );
+      context.fillStyle = isAccent ? (options?.accentColor ?? context.fillStyle) : (options?.normalColor ?? context.fillStyle);
+      context.fillText(char, cursorX, y);
+      cursorX += context.measureText(char).width;
+      const nextChar = chars[index + 1];
+      if (nextChar && !/\s/.test(char) && !/\s/.test(nextChar)) {
+        cursorX += tracking;
+      }
+      globalCharIndex += 1;
+    });
   }
+
+  return globalCharIndex - (options?.globalCharStart ?? 0);
 }
 
 function balanceTitleLines(
@@ -569,29 +677,30 @@ function wrapTitleByWidth(
 
 function fitTitleLines(title: string, settings: TypographySettings) {
   const cleanTitle = title.trim();
+  const titleLineHeightRatio = getTitleLineHeightRatio(settings.titleFontMode);
   if (!cleanTitle) {
     return {
       titleSize: settings.titleSize,
-      titleLineHeight: settings.titleSize * 1.16,
+      titleLineHeight: settings.titleSize * titleLineHeightRatio,
       titleLines: [] as string[]
     };
   }
-  const minSize = Math.max(34, settings.titleSize - 16);
+  const minSize = Math.max(34, settings.titleSize - 18);
   for (let size = settings.titleSize; size >= minSize; size -= 2) {
-    const context = getMeasureContext(`700 ${size}px ${TITLE_FONT_MODES[settings.titleFontMode].family}`);
+    const context = getMeasureContext(`${getTitleFontWeight(settings.titleFontMode)} ${size}px ${TITLE_FONT_MODES[settings.titleFontMode].family}`);
     const lines = wrapTitleByWidth(cleanTitle, context, CONTENT_WIDTH, settings.titleFontMode);
     if (lines.length <= 2) {
       return {
         titleSize: size,
-        titleLineHeight: size * 1.16,
+        titleLineHeight: size * titleLineHeightRatio,
         titleLines: lines
       };
     }
   }
-  const context = getMeasureContext(`700 ${minSize}px ${TITLE_FONT_MODES[settings.titleFontMode].family}`);
+  const context = getMeasureContext(`${getTitleFontWeight(settings.titleFontMode)} ${minSize}px ${TITLE_FONT_MODES[settings.titleFontMode].family}`);
   return {
     titleSize: minSize,
-    titleLineHeight: minSize * 1.16,
+    titleLineHeight: minSize * titleLineHeightRatio,
     titleLines: wrapTitleByWidth(cleanTitle, context, CONTENT_WIDTH, settings.titleFontMode)
   };
 }
@@ -600,18 +709,21 @@ function getPosterMetrics(page: PosterPage, settings: TypographySettings): Poste
   const bodySize = Math.max(21, settings.bodySize - 4);
   const bodyLineHeight = bodySize * Math.max(1.58, settings.lineHeight - 0.06);
   const bodyParagraphGap = Math.max(14, bodySize * 0.72);
-  const titleBlock = page.kind === "cover" && page.title.trim() ? fitTitleLines(page.title, settings) : null;
-  const titleStartY = 126;
-  const separatorY = titleBlock ? titleStartY + titleBlock.titleLines.length * titleBlock.titleLineHeight + 4 : 110;
-  const bodyTopY = separatorY + 10;
+  const parsedTitle = page.kind === "cover" && page.title.trim() ? parseTitleMarkup(page.title) : null;
+  const titleBlock = parsedTitle ? fitTitleLines(parsedTitle.plainText, settings) : null;
+  const titleLineHeightRatio = getTitleLineHeightRatio(settings.titleFontMode);
+  const titleStartY = 176;
+  const separatorY = titleBlock ? titleStartY + titleBlock.titleLines.length * titleBlock.titleLineHeight + 2 : 110;
+  const bodyTopY = separatorY + (titleBlock ? 6 : 10);
   const bodyBottomY = 818;
   return {
     titleSize: titleBlock?.titleSize ?? settings.titleSize,
-    titleLineHeight: titleBlock?.titleLineHeight ?? settings.titleSize * 1.16,
+    titleLineHeight: titleBlock?.titleLineHeight ?? settings.titleSize * titleLineHeightRatio,
     bodySize,
     bodyLineHeight,
     bodyParagraphGap,
     titleLines: titleBlock?.titleLines ?? [],
+    titleAccentRanges: parsedTitle?.accentRanges ?? [],
     titleStartY,
     separatorY,
     bodyTopY,
@@ -623,11 +735,16 @@ function getPosterMetrics(page: PosterPage, settings: TypographySettings): Poste
 function measureParagraphBlock(block: ParagraphBlock, fontSize: number, lineHeight: number, maxWidth: number) {
   const activeFontSize = block.kind === "subheading" ? Math.round(fontSize * 1.08) : fontSize;
   const activeLineHeight = block.kind === "subheading" ? lineHeight * 1.02 : lineHeight;
-  const quoteWidth = block.kind === "quote" ? maxWidth - 44 : maxWidth;
+  const quoteWidth = block.kind === "quote" ? maxWidth - 72 : maxWidth;
   const lines = wrapInlineTokensByWidth(parseInlineMarkdown(block.raw), activeFontSize, quoteWidth);
+  const textHeight = activeFontSize + Math.max(0, lines.length - 1) * activeLineHeight;
+  const quotePaddingTop = block.kind === "quote" ? Math.max(24, activeFontSize * 0.66) : 0;
+  const quotePaddingBottom = block.kind === "quote" ? Math.max(18, activeFontSize * 0.5) : 0;
   return {
     lines,
-    height: lines.length * activeLineHeight
+    height: block.kind === "quote"
+      ? quotePaddingTop + textHeight + quotePaddingBottom
+      : lines.length * activeLineHeight
   };
 }
 
@@ -644,57 +761,80 @@ function drawInlineParagraph(
 ) {
   const isQuote = block.kind === "quote";
   const isSubheading = block.kind === "subheading";
-  const quoteInset = isQuote ? 26 : 0;
+  const quoteInset = isQuote ? 36 : 0;
   const activeFontSize = isSubheading ? Math.round(fontSize * 1.08) : fontSize;
   const activeLineHeight = isSubheading ? lineHeight * 1.02 : lineHeight;
-  const quoteWidth = isQuote ? maxWidth - 44 : maxWidth;
+  const quoteWidth = isQuote ? maxWidth - 72 : maxWidth;
   const lines = wrapInlineTokensByWidth(parseInlineMarkdown(block.raw), activeFontSize, quoteWidth);
-  const blockHeight = lines.length * activeLineHeight;
+  const textHeight = activeFontSize + Math.max(0, lines.length - 1) * activeLineHeight;
+  const quotePaddingTop = isQuote ? Math.max(24, activeFontSize * 0.66) : 0;
+  const quotePaddingBottom = isQuote ? Math.max(18, activeFontSize * 0.5) : 0;
+  const blockHeight = isQuote
+    ? quotePaddingTop + textHeight + quotePaddingBottom
+    : lines.length * activeLineHeight;
 
   if (isQuote) {
     context.save();
-    context.fillStyle = "rgba(255,255,255,0.32)";
-    roundRectPath(context, x - 16, y - activeFontSize + 10, maxWidth, blockHeight + 20, 20);
+    context.fillStyle = hexToRgba(theme.palette.accent, 0.06);
+    roundRectPath(context, x - 18, y, maxWidth - 8, blockHeight, 18);
     context.fill();
+    context.strokeStyle = hexToRgba(theme.palette.accent, 0.1);
+    context.lineWidth = 1;
+    context.stroke();
     context.restore();
 
     context.save();
     context.fillStyle = theme.palette.accent;
-    roundRectPath(context, x - 2, y - activeFontSize + 16, 6, blockHeight + 8, 6);
+    roundRectPath(context, x - 12, y + 14, 5, Math.max(26, blockHeight - 28), 5);
     context.fill();
     context.restore();
   }
 
   lines.forEach((line, lineIndex) => {
     let cursorX = x + quoteInset;
-    const baselineY = y + lineIndex * activeLineHeight;
+    const baselineY = isQuote
+      ? y + quotePaddingTop + activeFontSize * 0.78 + lineIndex * activeLineHeight
+      : y + lineIndex * activeLineHeight;
 
     for (const token of line.tokens) {
       const tokenWidth = getBodyTokenWidth(token, activeFontSize);
       if (token.mark) {
         context.save();
         if (highlightStyle === "underline") {
-          context.fillStyle = hexToRgba(theme.palette.accent, 0.26);
-          context.fillRect(cursorX - 1, baselineY - activeFontSize * 0.18, tokenWidth + 2, Math.max(6, activeFontSize * 0.16));
+          context.fillStyle = hexToRgba(theme.palette.accent, 0.34);
+          roundRectPath(
+            context,
+            cursorX - 2,
+            baselineY - activeFontSize * 0.26,
+            tokenWidth + 4,
+            Math.max(8, activeFontSize * 0.24),
+            4
+          );
+          context.fill();
         } else if (highlightStyle === "border") {
-          context.strokeStyle = hexToRgba(theme.palette.accent, 0.44);
-          context.lineWidth = 1.2;
-          context.setLineDash([4, 3]);
-          context.strokeRect(cursorX - 3, baselineY - activeFontSize + 7, tokenWidth + 6, activeFontSize + 8);
+          context.strokeStyle = hexToRgba(theme.palette.accent, 0.54);
+          context.lineWidth = 3;
+          context.lineCap = "round";
+          context.setLineDash([8, 5]);
+          context.beginPath();
+          context.moveTo(cursorX - 1, baselineY + Math.max(5, activeFontSize * 0.12));
+          context.lineTo(cursorX + tokenWidth + 1, baselineY + Math.max(5, activeFontSize * 0.12));
+          context.stroke();
           context.setLineDash([]);
         } else {
-          context.fillStyle = hexToRgba(theme.palette.accent, 0.18);
+          context.fillStyle = hexToRgba(theme.palette.accent, 0.24);
           context.fillRect(
             cursorX - 2,
             baselineY - activeFontSize * 0.42,
             tokenWidth + 4,
-            Math.max(12, activeFontSize * 0.52)
+            Math.max(13, activeFontSize * 0.56)
           );
         }
         context.restore();
       }
       context.save();
-      const weight = isSubheading ? 600 : token.bold ? 500 : token.mark ? 500 : 300;
+      const weight = isSubheading ? 600 : token.mark ? 600 : token.bold ? 500 : isQuote ? 400 : 300;
+      context.globalCompositeOperation = "multiply";
       context.font = `${weight} ${activeFontSize}px ${BODY_FONT_FAMILY}`;
       context.fillStyle = theme.palette.text;
       context.fillText(token.text, cursorX, baselineY);
@@ -709,9 +849,10 @@ function drawInlineParagraph(
 function layoutPosterPages(raw: string, manualTitle: string, settings: TypographySettings) {
   const parsed = parseInput(raw);
   const title = manualTitle.trim();
+  const renderableTitle = parseTitleMarkup(title).plainText.trim();
   let sourceParagraphs = parsed.paragraphs.filter((paragraph) => paragraph.trim().length > 0);
 
-  if (title && sourceParagraphs.length > 0 && normalizeComparableText(sourceParagraphs[0]) === normalizeComparableText(title)) {
+  if (renderableTitle && sourceParagraphs.length > 0 && normalizeComparableText(sourceParagraphs[0]) === normalizeComparableText(renderableTitle)) {
     sourceParagraphs = sourceParagraphs.slice(1);
   }
 
@@ -753,9 +894,12 @@ function layoutPosterPages(raw: string, manualTitle: string, settings: Typograph
 
       if (blockBottom <= metrics.bodyBottomY) {
         page.paragraphs.push(currentText);
-        const lineHeight = block.kind === "subheading" ? metrics.bodyLineHeight * 1.02 : metrics.bodyLineHeight;
-        const gap = block.kind === "subheading" ? metrics.bodyParagraphGap * 0.78 : metrics.bodyParagraphGap;
-        cursorY += lines.length * lineHeight + gap;
+        const gap = block.kind === "subheading"
+          ? metrics.bodyParagraphGap * 0.78
+          : block.kind === "quote"
+            ? metrics.bodyParagraphGap * 1.28
+            : metrics.bodyParagraphGap;
+        cursorY += height + gap;
         if (carryParagraph) carryParagraph = "";
         else currentParagraph += 1;
         continue;
@@ -899,38 +1043,48 @@ async function renderPosterToDataUrl(
   context.restore();
 
   if (page.kind === "cover" && page.title.trim()) {
+    const titleLineWidths = metrics.titleLines.map((line) => measureTitleText(line, metrics.titleSize, settings.titleFontMode));
+    const accentRanges = metrics.titleAccentRanges;
+    const titleAccentColor = mixHexColors(theme.palette.text, theme.palette.accent, 0.62);
+
     context.save();
-    context.fillStyle = "rgba(255,255,255,0.16)";
-    context.font = `700 126px ${TITLE_FONT_FAMILY}`;
-    context.fillText("“", 58, 118);
+    context.fillStyle = "rgba(255,255,255,0.18)";
+    context.font = `500 ${Math.round(metrics.titleSize * 1.46)}px ${TITLE_FONT_FAMILY}`;
+    context.fillText("“", 58, metrics.titleStartY - Math.max(18, metrics.titleSize * 0.24));
     context.restore();
 
     context.save();
     context.globalCompositeOperation = "multiply";
-    context.fillStyle = theme.palette.text;
+    let titleCharOffset = 0;
     metrics.titleLines.forEach((line, lineIndex) => {
-      drawTitleLine(
+      const lineX = lineIndex === 1 && metrics.titleLines.length > 1
+        ? CONTENT_LEFT + Math.max(16, Math.min(34, (titleLineWidths[0] - titleLineWidths[lineIndex]) * 0.22 + 12))
+        : CONTENT_LEFT;
+      titleCharOffset += drawTitleLine(
         context,
         line,
-        CONTENT_LEFT,
+        lineX,
         metrics.titleStartY + lineIndex * metrics.titleLineHeight,
         metrics.titleSize,
-        settings.titleFontMode
+        settings.titleFontMode,
+        {
+          globalCharStart: titleCharOffset,
+          accentRanges,
+          normalColor: theme.palette.text,
+          accentColor: titleAccentColor
+        }
       );
     });
     context.restore();
   }
 
-  context.save();
-  context.globalCompositeOperation = "multiply";
-  context.fillStyle = theme.palette.text;
   let paragraphY = metrics.bodyTopY;
   page.paragraphs.forEach((paragraph) => {
     const block = getParagraphBlock(paragraph);
-    const { lines } = measureParagraphBlock(block, metrics.bodySize, metrics.bodyLineHeight, metrics.bodyWidth);
-    const blockBottom = paragraphY + (lines.length - 1) * (block.kind === "subheading" ? metrics.bodyLineHeight * 1.02 : metrics.bodyLineHeight);
+    const { height } = measureParagraphBlock(block, metrics.bodySize, metrics.bodyLineHeight, metrics.bodyWidth);
+    const blockBottom = paragraphY + height;
     if (blockBottom > metrics.bodyBottomY) return;
-    const lineCount = drawInlineParagraph(
+    drawInlineParagraph(
       context,
       block,
       CONTENT_LEFT,
@@ -941,11 +1095,13 @@ async function renderPosterToDataUrl(
       theme,
       highlightStyle
     );
-    const lineHeight = block.kind === "subheading" ? metrics.bodyLineHeight * 1.02 : metrics.bodyLineHeight;
-    const gap = block.kind === "subheading" ? metrics.bodyParagraphGap * 0.78 : metrics.bodyParagraphGap;
-    paragraphY += lineCount * lineHeight + gap;
+    const gap = block.kind === "subheading"
+      ? metrics.bodyParagraphGap * 0.78
+        : block.kind === "quote"
+          ? metrics.bodyParagraphGap * 1.28
+          : metrics.bodyParagraphGap;
+    paragraphY += height + gap;
   });
-  context.restore();
 
   context.strokeStyle = "rgba(90, 98, 108, 0.18)";
   context.lineWidth = 1;
@@ -1173,7 +1329,7 @@ export default function HomePage() {
                     <select id="highlight-style" className="select-input" value={highlightStyle} onChange={(event) => setHighlightStyle(event.target.value as HighlightStyle)}>
                       <option value="underline">优雅下划线</option>
                       <option value="marker">柔和涂抹</option>
-                      <option value="border">虚线边框</option>
+                      <option value="border">虚线下划线</option>
                     </select>
                   </div>
                   <div className="control-item">
@@ -1181,7 +1337,7 @@ export default function HomePage() {
                       <label htmlFor="title-size-range">标题字号</label>
                       <span className="section-meta section-meta--value">{titleSize}px</span>
                     </div>
-                    <input id="title-size-range" className="range-input" type="range" min={36} max={84} step={1} value={titleSize} onChange={(event) => setTitleSize(Number(event.target.value))} />
+                    <input id="title-size-range" className="range-input" type="range" min={36} max={96} step={1} value={titleSize} onChange={(event) => setTitleSize(Number(event.target.value))} />
                   </div>
                   <div className="control-item">
                     <div className="section-head section-head--compact">
