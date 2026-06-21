@@ -738,9 +738,15 @@ function wrapInlineTokensByWidth(tokens: InlineToken[], fontSize: number, maxWid
 function splitInlineLines(lines: InlineLine[], count: number) {
   const taken = lines.slice(0, count);
   const rest = lines.slice(count);
+  const serializeWithBlockKind = (raw: string, kind: ParagraphBlock["kind"]) => {
+    if (!raw) return "";
+    if (kind === "quote") return `> ${raw}`;
+    if (kind === "subheading") return `### ${raw}`;
+    return raw;
+  };
   return {
-    takenRaw: serializeInlineTokens(taken.flatMap((line) => line.tokens)),
-    restRaw: serializeInlineTokens(rest.flatMap((line) => line.tokens))
+    takenRaw: (kind: ParagraphBlock["kind"]) => serializeWithBlockKind(serializeInlineTokens(taken.flatMap((line) => line.tokens)), kind),
+    restRaw: (kind: ParagraphBlock["kind"]) => serializeWithBlockKind(serializeInlineTokens(rest.flatMap((line) => line.tokens)), kind)
   };
 }
 
@@ -982,10 +988,37 @@ function getPosterMetrics(page: PosterPage, settings: TypographySettings): Poste
   };
 }
 
-function getBlockGap(block: ParagraphBlock, metrics: PosterMetrics) {
-  if (block.kind === "subheading") return metrics.bodyParagraphGap * 0.78;
-  if (block.kind === "quote") return metrics.bodyParagraphGap * 1.48 + 10;
-  return metrics.bodyParagraphGap;
+function getGapBetweenBlocks(
+  previousBlock: ParagraphBlock | null,
+  currentBlock: ParagraphBlock,
+  metrics: PosterMetrics
+) {
+  if (!previousBlock) return 0;
+  const baseGap = metrics.bodyParagraphGap;
+  const quoteGap = baseGap * 1.08 + 4;
+  if (previousBlock.kind === "quote" || currentBlock.kind === "quote") return quoteGap;
+  if (previousBlock.kind === "subheading") return baseGap * 0.78;
+  return baseGap;
+}
+
+function getParagraphVisualHeight(lineCount: number, fontSize: number, lineHeight: number) {
+  if (lineCount <= 0) return 0;
+  return fontSize + Math.max(0, lineCount - 1) * lineHeight;
+}
+
+function getParagraphMaxLines(
+  block: ParagraphBlock,
+  availableHeight: number,
+  fontSize: number,
+  lineHeight: number
+) {
+  const activeFontSize = block.kind === "subheading" ? Math.round(fontSize * 1.08) : fontSize;
+  const activeLineHeight = block.kind === "subheading" ? lineHeight * 1.02 : lineHeight;
+  const quotePaddingTop = block.kind === "quote" ? Math.max(22, activeFontSize * 0.62) : 0;
+  const quotePaddingBottom = block.kind === "quote" ? quotePaddingTop : 0;
+  const textRoom = availableHeight - quotePaddingTop - quotePaddingBottom;
+  if (textRoom < activeFontSize) return 0;
+  return 1 + Math.floor((textRoom - activeFontSize) / activeLineHeight);
 }
 
 function measureParagraphBlock(block: ParagraphBlock, fontSize: number, lineHeight: number, maxWidth: number) {
@@ -993,14 +1026,14 @@ function measureParagraphBlock(block: ParagraphBlock, fontSize: number, lineHeig
   const activeLineHeight = block.kind === "subheading" ? lineHeight * 1.02 : lineHeight;
   const quoteWidth = block.kind === "quote" ? maxWidth - 72 : maxWidth;
   const lines = wrapInlineTokensByWidth(parseInlineMarkdown(block.raw), activeFontSize, quoteWidth);
-  const textHeight = activeFontSize + Math.max(0, lines.length - 1) * activeLineHeight;
+  const textHeight = getParagraphVisualHeight(lines.length, activeFontSize, activeLineHeight);
   const quotePaddingTop = block.kind === "quote" ? Math.max(22, activeFontSize * 0.62) : 0;
   const quotePaddingBottom = block.kind === "quote" ? quotePaddingTop : 0;
   return {
     lines,
     height: block.kind === "quote"
       ? quotePaddingTop + textHeight + quotePaddingBottom
-      : lines.length * activeLineHeight
+      : textHeight
   };
 }
 
@@ -1022,12 +1055,12 @@ function drawInlineParagraph(
   const activeLineHeight = isSubheading ? lineHeight * 1.02 : lineHeight;
   const quoteWidth = isQuote ? maxWidth - 72 : maxWidth;
   const lines = wrapInlineTokensByWidth(parseInlineMarkdown(block.raw), activeFontSize, quoteWidth);
-  const textHeight = activeFontSize + Math.max(0, lines.length - 1) * activeLineHeight;
+  const textHeight = getParagraphVisualHeight(lines.length, activeFontSize, activeLineHeight);
   const quotePaddingTop = isQuote ? Math.max(22, activeFontSize * 0.62) : 0;
   const quotePaddingBottom = isQuote ? quotePaddingTop : 0;
   const blockHeight = isQuote
     ? quotePaddingTop + textHeight + quotePaddingBottom
-    : lines.length * activeLineHeight;
+    : textHeight;
 
   if (isQuote) {
     const quoteBaseColor = isDarkPosterTheme(theme) ? theme.palette.text : theme.palette.accent;
@@ -1049,9 +1082,10 @@ function drawInlineParagraph(
 
   lines.forEach((line, lineIndex) => {
     let cursorX = x + quoteInset;
+    const textStartY = isQuote ? y + quotePaddingTop : y;
     const baselineY = isQuote
-      ? y + quotePaddingTop + activeFontSize * 0.84 + lineIndex * activeLineHeight
-      : y + lineIndex * activeLineHeight;
+      ? textStartY + activeFontSize * 0.84 + lineIndex * activeLineHeight
+      : textStartY + activeFontSize * 0.84 + lineIndex * activeLineHeight;
 
     for (const token of line.tokens) {
       const tokenWidth = getBodyTokenWidth(token, activeFontSize);
@@ -1142,17 +1176,20 @@ function layoutPosterPages(raw: string, manualTitle: string, settings: Typograph
     };
     const metrics = getPosterMetrics(page, settings);
     let cursorY = metrics.bodyTopY;
+    let previousBlock: ParagraphBlock | null = null;
 
     while (currentParagraph < expandedParagraphs.length || carryParagraph) {
       const currentText = carryParagraph || expandedParagraphs[currentParagraph];
       const block = getParagraphBlock(currentText);
+      const leadingGap = getGapBetweenBlocks(previousBlock, block, metrics);
       const { lines, height } = measureParagraphBlock(block, metrics.bodySize, metrics.bodyLineHeight, metrics.bodyWidth);
-      const blockBottom = cursorY + height;
+      const blockTop = cursorY + leadingGap;
+      const blockBottom = blockTop + height;
 
       if (blockBottom <= metrics.bodyBottomY) {
         page.paragraphs.push(currentText);
-        const gap = getBlockGap(block, metrics);
-        cursorY += height + gap;
+        cursorY = blockBottom;
+        previousBlock = block;
         if (carryParagraph) carryParagraph = "";
         else currentParagraph += 1;
         continue;
@@ -1166,7 +1203,7 @@ function layoutPosterPages(raw: string, manualTitle: string, settings: Typograph
           const candidate = fittedText ? `${fittedText}${currentText.includes("\n") ? "\n" : ""}${sentence}` : sentence;
           const candidateBlock = getParagraphBlock(candidate);
           const { height: candidateHeight } = measureParagraphBlock(candidateBlock, metrics.bodySize, metrics.bodyLineHeight, metrics.bodyWidth);
-          if (cursorY + candidateHeight <= metrics.bodyBottomY) {
+          if (blockTop + candidateHeight <= metrics.bodyBottomY) {
             fittedText = candidate;
             fittedCount += 1;
             continue;
@@ -1175,6 +1212,7 @@ function layoutPosterPages(raw: string, manualTitle: string, settings: Typograph
         }
         if (fittedText) {
           page.paragraphs.push(fittedText);
+          previousBlock = getParagraphBlock(fittedText);
           carryParagraph = sentenceParts.slice(fittedCount).join(currentText.includes("\n") ? "\n" : "").trim();
           if (!carryParagraph) currentParagraph += 1;
           break;
@@ -1183,12 +1221,14 @@ function layoutPosterPages(raw: string, manualTitle: string, settings: Typograph
 
       if (page.paragraphs.length > 0) break;
 
-      const remainingHeight = metrics.bodyBottomY - cursorY;
-      const maxLines = Math.floor(remainingHeight / metrics.bodyLineHeight);
+      const remainingHeight = metrics.bodyBottomY - blockTop;
+      const maxLines = getParagraphMaxLines(block, remainingHeight, metrics.bodySize, metrics.bodyLineHeight);
       if (maxLines <= 0) break;
       const { takenRaw, restRaw } = splitInlineLines(lines, maxLines);
-      if (takenRaw) page.paragraphs.push(takenRaw);
-      carryParagraph = restRaw;
+      const taken = takenRaw(block.kind);
+      const rest = restRaw(block.kind);
+      if (taken) page.paragraphs.push(taken);
+      carryParagraph = rest;
       if (!carryParagraph) currentParagraph += 1;
       break;
     }
@@ -1445,8 +1485,10 @@ async function renderPosterToDataUrl(
   }
 
   let paragraphY = metrics.bodyTopY;
+  let previousBlock: ParagraphBlock | null = null;
   page.paragraphs.forEach((paragraph) => {
     const block = getParagraphBlock(paragraph);
+    paragraphY += getGapBetweenBlocks(previousBlock, block, metrics);
     const { height } = measureParagraphBlock(block, metrics.bodySize, metrics.bodyLineHeight, metrics.bodyWidth);
     const blockBottom = paragraphY + height;
     if (blockBottom > metrics.bodyBottomY) return;
@@ -1461,8 +1503,8 @@ async function renderPosterToDataUrl(
       theme,
       highlightStyle
     );
-    const gap = getBlockGap(block, metrics);
-    paragraphY += height + gap;
+    paragraphY = blockBottom;
+    previousBlock = block;
   });
 
   context.strokeStyle = hexToRgba(theme.palette.text, theme.surface.footerLineAlpha);
