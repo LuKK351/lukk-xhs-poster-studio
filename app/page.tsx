@@ -40,6 +40,13 @@ type ThemeDefinition = {
     highlightMarkerAlpha: number;
     highlightDashAlpha: number;
   };
+  editor: {
+    titleSize: number;
+    bodySize: number;
+    lineHeight: number;
+    titleFontMode: TitleFontMode;
+    highlightStyle: HighlightStyle;
+  };
 };
 
 type PosterPage = {
@@ -131,6 +138,13 @@ const THEMES: ThemeDefinition[] = [
       highlightUnderlineAlpha: 0.48,
       highlightMarkerAlpha: 0.22,
       highlightDashAlpha: 0.72
+    },
+    editor: {
+      titleSize: 62,
+      bodySize: 31,
+      lineHeight: 1.68,
+      titleFontMode: "serif",
+      highlightStyle: "underline"
     }
   },
   {
@@ -170,6 +184,13 @@ const THEMES: ThemeDefinition[] = [
       highlightUnderlineAlpha: 0.56,
       highlightMarkerAlpha: 0.24,
       highlightDashAlpha: 0.76
+    },
+    editor: {
+      titleSize: 64,
+      bodySize: 31,
+      lineHeight: 1.72,
+      titleFontMode: "serif",
+      highlightStyle: "underline"
     }
   },
   {
@@ -209,6 +230,13 @@ const THEMES: ThemeDefinition[] = [
       highlightUnderlineAlpha: 0.42,
       highlightMarkerAlpha: 0.2,
       highlightDashAlpha: 0.66
+    },
+    editor: {
+      titleSize: 60,
+      bodySize: 30,
+      lineHeight: 1.7,
+      titleFontMode: "sans",
+      highlightStyle: "underline"
     }
   },
   {
@@ -248,6 +276,13 @@ const THEMES: ThemeDefinition[] = [
       highlightUnderlineAlpha: 0.48,
       highlightMarkerAlpha: 0.26,
       highlightDashAlpha: 0.7
+    },
+    editor: {
+      titleSize: 62,
+      bodySize: 31,
+      lineHeight: 1.72,
+      titleFontMode: "serif",
+      highlightStyle: "marker"
     }
   },
   {
@@ -287,6 +322,13 @@ const THEMES: ThemeDefinition[] = [
       highlightUnderlineAlpha: 0.56,
       highlightMarkerAlpha: 0.3,
       highlightDashAlpha: 0.8
+    },
+    editor: {
+      titleSize: 64,
+      bodySize: 31,
+      lineHeight: 1.7,
+      titleFontMode: "serif",
+      highlightStyle: "underline"
     }
   },
   {
@@ -326,6 +368,13 @@ const THEMES: ThemeDefinition[] = [
       highlightUnderlineAlpha: 0.88,
       highlightMarkerAlpha: 0.22,
       highlightDashAlpha: 0.92
+    },
+    editor: {
+      titleSize: 68,
+      bodySize: 29,
+      lineHeight: 1.58,
+      titleFontMode: "sans",
+      highlightStyle: "border"
     }
   }
 ];
@@ -384,6 +433,8 @@ const TITLE_FONT_MODES: Record<
     latinFamily: "'DingTalk JinBuTi','PingFang SC','Noto Sans SC',sans-serif"
   }
 };
+
+const INITIAL_THEME = THEMES[0];
 
 function getTitleFontWeight(mode: TitleFontMode) {
   return mode === "sans" ? 600 : 500;
@@ -1456,12 +1507,12 @@ export default function HomePage() {
   const [content, setContent] = useState(DEFAULT_CONTENT);
   const [manualTitle, setManualTitle] = useState("");
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>("content");
-  const [themeId, setThemeId] = useState(THEMES[0].id);
-  const [titleSize, setTitleSize] = useState(62);
-  const [bodySize, setBodySize] = useState(31);
-  const [lineHeight, setLineHeight] = useState(1.68);
-  const [titleFontMode, setTitleFontMode] = useState<TitleFontMode>("serif");
-  const [highlightStyle, setHighlightStyle] = useState<HighlightStyle>("underline");
+  const [themeId, setThemeId] = useState(INITIAL_THEME.id);
+  const [titleSize, setTitleSize] = useState(INITIAL_THEME.editor.titleSize);
+  const [bodySize, setBodySize] = useState(INITIAL_THEME.editor.bodySize);
+  const [lineHeight, setLineHeight] = useState(INITIAL_THEME.editor.lineHeight);
+  const [titleFontMode, setTitleFontMode] = useState<TitleFontMode>(INITIAL_THEME.editor.titleFontMode);
+  const [highlightStyle, setHighlightStyle] = useState<HighlightStyle>(INITIAL_THEME.editor.highlightStyle);
   const [footerLeft, setFooterLeft] = useState("困困");
   const [footerRightMode, setFooterRightMode] = useState<FooterRightMode>("auto");
   const [cardCornerMode, setCardCornerMode] = useState<CardCornerMode>("square");
@@ -1472,10 +1523,24 @@ export default function HomePage() {
 
   const theme = useMemo(() => THEMES.find((item) => item.id === themeId) ?? THEMES[0], [themeId]);
   const characterCount = content.replace(/\s+/g, "").length;
+  const isTypographyDirty =
+    titleSize !== theme.editor.titleSize ||
+    bodySize !== theme.editor.bodySize ||
+    lineHeight !== theme.editor.lineHeight ||
+    titleFontMode !== theme.editor.titleFontMode ||
+    highlightStyle !== theme.editor.highlightStyle;
   const typographySettings = useMemo(
     () => ({ titleSize, bodySize, lineHeight, titleFontMode }),
     [titleSize, bodySize, lineHeight, titleFontMode]
   );
+
+  function applyThemeEditorDefaults(targetTheme: ThemeDefinition = theme) {
+    setTitleSize(targetTheme.editor.titleSize);
+    setBodySize(targetTheme.editor.bodySize);
+    setLineHeight(targetTheme.editor.lineHeight);
+    setTitleFontMode(targetTheme.editor.titleFontMode);
+    setHighlightStyle(targetTheme.editor.highlightStyle);
+  }
 
   useEffect(() => {
     setPages(layoutPosterPages(deferredContent, manualTitle, typographySettings));
@@ -1535,8 +1600,7 @@ export default function HomePage() {
     <main className="studio-shell">
       <section className="hero-card">
         <div className="hero-copy">
-          <p className="hero-eyebrow">Independent Tool / 3:4 HTML Poster</p>
-          <h1>短文进来，自动排成一页页能发的小红书（小绿书）卡片</h1>
+          <h1>文章进来，自动排成一页页能发的小红书卡片</h1>
           <p className="hero-text">你贴内容，我负责标题强化、智能分页、配色和批量导出。</p>
         </div>
       </section>
@@ -1559,170 +1623,183 @@ export default function HomePage() {
               视觉样式
             </button>
           </div>
-          {sidebarTab === "content" ? (
-            <>
-              <div className="panel-section">
-                <div className="section-head">
-                  <label htmlFor="title-input">自定义标题</label>
-                  <span className="section-meta">可选</span>
+          <div className="control-panel-scroll">
+            {sidebarTab === "content" ? (
+              <>
+                <div className="panel-section">
+                  <div className="section-head">
+                    <label htmlFor="title-input">自定义标题</label>
+                    <span className="section-meta">可选</span>
+                  </div>
+                  <textarea
+                    id="title-input"
+                    className="text-area text-area--title"
+                    value={manualTitle}
+                    onChange={(event) => setManualTitle(event.target.value)}
+                    placeholder="留空则不显示标题，只排正文；回车可手动换行；**重点词** 可异色强调"
+                  />
                 </div>
-                <textarea
-                  id="title-input"
-                  className="text-area text-area--title"
-                  value={manualTitle}
-                  onChange={(event) => setManualTitle(event.target.value)}
-                  placeholder="留空则不显示标题，只排正文；回车可手动换行；**重点词** 可异色强调"
-                />
-              </div>
 
-              <div className="panel-section">
-                <div className="section-head">
-                  <label htmlFor="content-input">正文内容</label>
-                  <span className="section-meta section-meta--quiet">{characterCount} 字</span>
+                <div className="panel-section">
+                  <div className="section-head">
+                    <label htmlFor="content-input">正文内容</label>
+                    <span className="section-meta section-meta--quiet">{characterCount} 字</span>
+                  </div>
+                  <textarea
+                    id="content-input"
+                    className="text-area"
+                    value={content}
+                    onChange={(event) => setContent(event.target.value)}
+                    placeholder="直接贴正文内容，空行分段。"
+                  />
                 </div>
-                <textarea
-                  id="content-input"
-                  className="text-area"
-                  value={content}
-                  onChange={(event) => setContent(event.target.value)}
-                  placeholder="直接贴正文内容，空行分段。"
-                />
-              </div>
-            </>
-          ) : (
-            <>
-              <details className="accordion-section" open>
-                <summary className="accordion-summary">✦ 排版风格预设</summary>
-                <div className="section-head section-head--inside">
-                  <span>当前预设</span>
-                  <span className="section-meta">{theme.preset}</span>
-                </div>
-                <div className="theme-list">
-                  {THEMES.map((item) => {
-                    const isActive = item.id === themeId;
-                    return (
-                      <button
-                        key={item.id}
-                        type="button"
-                        className={`theme-card${isActive ? " active" : ""}`}
-                        onClick={() => setThemeId(item.id)}
-                        style={isActive ? { borderColor: item.palette.accent, boxShadow: `0 16px 32px ${hexToRgba(item.palette.accent, 0.14)}` } : undefined}
-                      >
-                        <span
-                          className="theme-swatch"
-                          style={{
-                            background: getThemeSwatchBackground(item),
-                            boxShadow: `inset 0 0 0 1px ${item.palette.border}`
-                          }}
+              </>
+            ) : (
+              <>
+                <details className="accordion-section" open>
+                  <summary className="accordion-summary">排版风格预设</summary>
+                  <div className="section-head section-head--inside">
+                    <span>当前预设</span>
+                    <span className="section-meta">{theme.preset}</span>
+                  </div>
+                  <div className="theme-list">
+                    {THEMES.map((item) => {
+                      const isActive = item.id === themeId;
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          className={`theme-card${isActive ? " active" : ""}`}
+                          onClick={() => setThemeId(item.id)}
+                          style={isActive ? { borderColor: item.palette.accent, boxShadow: `0 16px 32px ${hexToRgba(item.palette.accent, 0.14)}` } : undefined}
                         >
-                          <span className="theme-swatch-preset" style={{ color: item.mode === "obsidian" || item.mode === "archive" ? hexToRgba(item.palette.text, 0.82) : item.palette.muted }}>
-                            {item.preset}
+                          <span
+                            className="theme-swatch"
+                            style={{
+                              background: getThemeSwatchBackground(item),
+                              boxShadow: `inset 0 0 0 1px ${item.palette.border}`
+                            }}
+                          >
+                            <span className="theme-swatch-preset" style={{ color: item.mode === "obsidian" || item.mode === "archive" ? hexToRgba(item.palette.text, 0.82) : item.palette.muted }}>
+                              {item.preset}
+                            </span>
+                            <span className="theme-swatch-name" style={{ color: item.palette.text }}>
+                              {item.name}
+                            </span>
                           </span>
-                          <span className="theme-swatch-name" style={{ color: item.palette.text }}>
-                            {item.name}
+                          <span className="theme-card-copy">
+                            <strong>{item.name}</strong>
+                            <span>{item.description}</span>
                           </span>
-                        </span>
-                        <span className="theme-card-copy">
-                          <strong>{item.name}</strong>
-                          <span>{item.description}</span>
-                        </span>
-                        <span className="theme-card-check" style={{ background: item.palette.accent }} aria-hidden="true">{isActive ? "✓" : ""}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </details>
+                          <span className="theme-card-check" style={{ background: item.palette.accent }} aria-hidden="true">{isActive ? "✓" : ""}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </details>
 
-              <details className="accordion-section" open>
-                <summary className="accordion-summary">✦ 排版微调</summary>
-                <div className="control-stack">
-                  <div className="control-item">
-                    <div className="section-head section-head--compact">
-                      <label htmlFor="title-font-mode">标题样式</label>
-                      <span className="section-meta">字体气质</span>
-                    </div>
-                    <select id="title-font-mode" className="select-input" value={titleFontMode} onChange={(event) => setTitleFontMode(event.target.value as TitleFontMode)}>
-                      {Object.entries(TITLE_FONT_MODES).map(([id, config]) => (
-                        <option key={id} value={id}>{config.label}</option>
-                      ))}
-                    </select>
+                <details className="accordion-section" open>
+                  <summary className="accordion-summary">排版微调</summary>
+                  <div className="accordion-tools">
+                    <span className="section-meta">恢复当前预设的推荐排版</span>
+                    <button
+                      type="button"
+                      className="inline-reset-button"
+                      onClick={() => applyThemeEditorDefaults()}
+                      disabled={!isTypographyDirty}
+                    >
+                      恢复默认
+                    </button>
                   </div>
-                  <div className="control-item">
-                    <div className="section-head section-head--compact">
-                      <label htmlFor="highlight-style">高亮样式</label>
-                      <span className="section-meta">随主题变化</span>
+                  <div className="control-stack">
+                    <div className="control-item">
+                      <div className="section-head section-head--compact">
+                        <label htmlFor="title-font-mode">标题样式</label>
+                        <span className="section-meta">字体气质</span>
+                      </div>
+                      <select id="title-font-mode" className="select-input" value={titleFontMode} onChange={(event) => setTitleFontMode(event.target.value as TitleFontMode)}>
+                        {Object.entries(TITLE_FONT_MODES).map(([id, config]) => (
+                          <option key={id} value={id}>{config.label}</option>
+                        ))}
+                      </select>
                     </div>
-                    <select id="highlight-style" className="select-input" value={highlightStyle} onChange={(event) => setHighlightStyle(event.target.value as HighlightStyle)}>
-                      <option value="underline">优雅下划线</option>
-                      <option value="marker">柔和涂抹</option>
-                      <option value="border">虚线下划线</option>
-                    </select>
+                    <div className="control-item">
+                      <div className="section-head section-head--compact">
+                        <label htmlFor="highlight-style">高亮样式</label>
+                        <span className="section-meta">随主题变化</span>
+                      </div>
+                      <select id="highlight-style" className="select-input" value={highlightStyle} onChange={(event) => setHighlightStyle(event.target.value as HighlightStyle)}>
+                        <option value="underline">优雅下划线</option>
+                        <option value="marker">柔和涂抹</option>
+                        <option value="border">虚线下划线</option>
+                      </select>
+                    </div>
+                    <div className="control-item">
+                      <div className="section-head section-head--compact">
+                        <label htmlFor="title-size-range">标题字号</label>
+                        <span className="section-meta section-meta--value">{titleSize}px</span>
+                      </div>
+                      <input id="title-size-range" className="range-input" type="range" min={36} max={96} step={1} value={titleSize} onChange={(event) => setTitleSize(Number(event.target.value))} />
+                    </div>
+                    <div className="control-item">
+                      <div className="section-head section-head--compact">
+                        <label htmlFor="body-size-range">正文字号</label>
+                        <span className="section-meta section-meta--value">{bodySize}px</span>
+                      </div>
+                      <input id="body-size-range" className="range-input" type="range" min={22} max={40} step={1} value={bodySize} onChange={(event) => setBodySize(Number(event.target.value))} />
+                    </div>
+                    <div className="control-item">
+                      <div className="section-head section-head--compact">
+                        <label htmlFor="line-height-range">正文行距</label>
+                        <span className="section-meta section-meta--value">{lineHeight.toFixed(2)}</span>
+                      </div>
+                      <input id="line-height-range" className="range-input" type="range" min={1.4} max={2} step={0.02} value={lineHeight} onChange={(event) => setLineHeight(Number(event.target.value))} />
+                      <div className="preset-row">
+                        <button type="button" className={`preset-chip${lineHeight <= 1.56 ? " active" : ""}`} onClick={() => setLineHeight(1.52)}>紧凑</button>
+                        <button type="button" className={`preset-chip${lineHeight > 1.56 && lineHeight < 1.76 ? " active" : ""}`} onClick={() => setLineHeight(1.68)}>适中</button>
+                        <button type="button" className={`preset-chip${lineHeight >= 1.76 ? " active" : ""}`} onClick={() => setLineHeight(1.84)}>宽松</button>
+                      </div>
+                    </div>
                   </div>
-                  <div className="control-item">
-                    <div className="section-head section-head--compact">
-                      <label htmlFor="title-size-range">标题字号</label>
-                      <span className="section-meta section-meta--value">{titleSize}px</span>
-                    </div>
-                    <input id="title-size-range" className="range-input" type="range" min={36} max={96} step={1} value={titleSize} onChange={(event) => setTitleSize(Number(event.target.value))} />
-                  </div>
-                  <div className="control-item">
-                    <div className="section-head section-head--compact">
-                      <label htmlFor="body-size-range">正文字号</label>
-                      <span className="section-meta section-meta--value">{bodySize}px</span>
-                    </div>
-                    <input id="body-size-range" className="range-input" type="range" min={22} max={40} step={1} value={bodySize} onChange={(event) => setBodySize(Number(event.target.value))} />
-                  </div>
-                  <div className="control-item">
-                    <div className="section-head section-head--compact">
-                      <label htmlFor="line-height-range">正文行距</label>
-                      <span className="section-meta section-meta--value">{lineHeight.toFixed(2)}</span>
-                    </div>
-                    <input id="line-height-range" className="range-input" type="range" min={1.4} max={2} step={0.02} value={lineHeight} onChange={(event) => setLineHeight(Number(event.target.value))} />
-                    <div className="preset-row">
-                      <button type="button" className={`preset-chip${lineHeight <= 1.56 ? " active" : ""}`} onClick={() => setLineHeight(1.52)}>紧凑</button>
-                      <button type="button" className={`preset-chip${lineHeight > 1.56 && lineHeight < 1.76 ? " active" : ""}`} onClick={() => setLineHeight(1.68)}>适中</button>
-                      <button type="button" className={`preset-chip${lineHeight >= 1.76 ? " active" : ""}`} onClick={() => setLineHeight(1.84)}>宽松</button>
-                    </div>
-                  </div>
-                </div>
-              </details>
+                </details>
 
-              <details className="accordion-section">
-                <summary className="accordion-summary">✦ 页脚与卡片</summary>
-                <div className="control-stack">
-                  <div className="control-item">
-                    <div className="section-head section-head--compact">
-                      <label htmlFor="footer-left-input">左下角内容</label>
-                      <span className="section-meta">默认困困</span>
+                <details className="accordion-section">
+                  <summary className="accordion-summary">页脚与卡片</summary>
+                  <div className="control-stack">
+                    <div className="control-item">
+                      <div className="section-head section-head--compact">
+                        <label htmlFor="footer-left-input">左下角内容</label>
+                        <span className="section-meta">默认困困</span>
+                      </div>
+                      <input id="footer-left-input" className="text-input" value={footerLeft} onChange={(event) => setFooterLeft(event.target.value)} placeholder="困困" />
                     </div>
-                    <input id="footer-left-input" className="text-input" value={footerLeft} onChange={(event) => setFooterLeft(event.target.value)} placeholder="困困" />
-                  </div>
-                  <div className="control-item">
-                    <div className="section-head section-head--compact">
-                      <label htmlFor="footer-right-mode">右下角内容</label>
-                      <span className="section-meta">默认自动</span>
+                    <div className="control-item">
+                      <div className="section-head section-head--compact">
+                        <label htmlFor="footer-right-mode">右下角内容</label>
+                        <span className="section-meta">默认自动</span>
+                      </div>
+                      <select id="footer-right-mode" className="select-input" value={footerRightMode} onChange={(event) => setFooterRightMode(event.target.value as FooterRightMode)}>
+                        <option value="auto">自动</option>
+                        <option value="blank">留空</option>
+                        <option value="page">显示页码</option>
+                        <option value="date">显示北京时间日期</option>
+                      </select>
                     </div>
-                    <select id="footer-right-mode" className="select-input" value={footerRightMode} onChange={(event) => setFooterRightMode(event.target.value as FooterRightMode)}>
-                      <option value="auto">自动</option>
-                      <option value="blank">留空</option>
-                      <option value="page">显示页码</option>
-                      <option value="date">显示北京时间日期</option>
-                    </select>
-                  </div>
-                  <div className="control-item">
-                    <div className="section-head section-head--compact">
-                      <label htmlFor="card-corner-mode">边角样式</label>
-                      <span className="section-meta">预览与导出同步</span>
+                    <div className="control-item">
+                      <div className="section-head section-head--compact">
+                        <label htmlFor="card-corner-mode">边角样式</label>
+                        <span className="section-meta">预览与导出同步</span>
+                      </div>
+                      <select id="card-corner-mode" className="select-input" value={cardCornerMode} onChange={(event) => setCardCornerMode(event.target.value as CardCornerMode)}>
+                        <option value="rounded">圆角</option>
+                        <option value="square">直角</option>
+                      </select>
                     </div>
-                    <select id="card-corner-mode" className="select-input" value={cardCornerMode} onChange={(event) => setCardCornerMode(event.target.value as CardCornerMode)}>
-                      <option value="rounded">圆角</option>
-                      <option value="square">直角</option>
-                    </select>
                   </div>
-                </div>
-              </details>
-            </>
-          )}
+                </details>
+              </>
+            )}
+          </div>
         </aside>
 
         <section className="preview-panel">
@@ -1781,7 +1858,7 @@ export default function HomePage() {
           <div className="preview-action-bar">
             <div>
               <span className="preview-action-kicker">准备好了就直接导出</span>
-              <strong>{pages.length} 张卡片将按当前主题批量下载</strong>
+              <strong>{pages.length} 张卡片将按当前主题批量下载，或右键单击单张图片保存</strong>
             </div>
             <button className="primary-button preview-primary-button" onClick={() => void handleExportAll()} disabled={isExporting}>
               {isExporting ? "导出中..." : "生成并下载"}
