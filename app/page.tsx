@@ -515,16 +515,17 @@ function parseTitleMarkup(raw: string) {
   let sourceCursor = 0;
   let charCursor = 0;
   const pattern = /\*\*([\s\S]+?)\*\*/g;
+  const countVisibleTitleChars = (text: string) => Array.from(text.replace(/\n/g, "")).length;
 
   for (const match of raw.matchAll(pattern)) {
     const matchIndex = match.index ?? 0;
     const before = raw.slice(sourceCursor, matchIndex);
     plainText += before;
-    charCursor += Array.from(before).length;
+    charCursor += countVisibleTitleChars(before);
 
     const emphasized = match[1] ?? "";
     plainText += emphasized;
-    const emphasizedLength = Array.from(emphasized).length;
+    const emphasizedLength = countVisibleTitleChars(emphasized);
     if (emphasized.trim()) {
       ranges.push({ start: charCursor, end: charCursor + emphasizedLength });
     }
@@ -999,7 +1000,7 @@ function drawInlineParagraph(
       }
       context.save();
       const weight = isSubheading ? 600 : token.mark ? 600 : token.bold ? 500 : isQuote ? 400 : 300;
-      context.globalCompositeOperation = "multiply";
+      context.globalCompositeOperation = theme.mode === "obsidian" ? "screen" : "multiply";
       context.font = `${weight} ${activeFontSize}px ${BODY_FONT_FAMILY}`;
       context.fillStyle = theme.palette.text;
       context.fillText(token.text, cursorX, baselineY);
