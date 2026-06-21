@@ -10,7 +10,7 @@ URL="http://127.0.0.1:${PORT}"
 LOG_FILE="/tmp/xhs-poster-studio.log"
 
 open_browser() {
-  /usr/bin/open "$URL" >/dev/null 2>&1 || true
+  /usr/bin/open "$URL" >/dev/null 2>&1 && return 0
   /usr/bin/osascript -e "open location \"$URL\"" >/dev/null 2>&1 || true
 }
 
