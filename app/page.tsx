@@ -6,6 +6,9 @@ type ThemeDefinition = {
   id: string;
   name: string;
   mood: string;
+  preset: string;
+  description: string;
+  mode: "mist" | "sage" | "vintage" | "obsidian" | "swiss";
   palette: {
     page: string;
     pageAlt: string;
@@ -16,6 +19,26 @@ type ThemeDefinition = {
     border: string;
     shadow: string;
     glow: string;
+  };
+  surface: {
+    grainAlpha: number;
+    vignetteAlpha: number;
+    washStrength: number;
+    innerFrameAlpha: number;
+    innerFrameInset: number;
+    titleAccentMix: number;
+    footerLineAlpha: number;
+    footerTextAlpha: number;
+    previewShadow: string;
+  };
+  components: {
+    quoteFillAlpha: number;
+    quoteStrokeAlpha: number;
+    quoteBarAlpha: number;
+    quoteRadius: number;
+    highlightUnderlineAlpha: number;
+    highlightMarkerAlpha: number;
+    highlightDashAlpha: number;
   };
 };
 
@@ -74,113 +97,196 @@ const THEMES: ThemeDefinition[] = [
   {
     id: "mist-lake",
     name: "雾湖",
-    mood: "灰蓝莫兰迪",
+    mood: "冷纸感与雾蓝墨色",
+    preset: "冷淡纸质书",
+    description: "冷感纸面、雾蓝油墨、适合知性分析",
+    mode: "mist",
     palette: {
-      page: "#f4f0e8",
-      pageAlt: "#e6edf0",
-      text: "#233446",
-      muted: "#657588",
-      accent: "#6e8799",
-      accentSoft: "rgba(110, 135, 153, 0.16)",
-      border: "rgba(87, 105, 122, 0.16)",
-      shadow: "rgba(90, 105, 119, 0.18)",
-      glow: "rgba(140, 160, 172, 0.28)"
+      page: "#f2f4f5",
+      pageAlt: "#e5ebef",
+      text: "#203244",
+      muted: "#647586",
+      accent: "#56789c",
+      accentSoft: "rgba(86, 120, 156, 0.16)",
+      border: "rgba(57, 76, 96, 0.15)",
+      shadow: "rgba(74, 88, 103, 0.14)",
+      glow: "rgba(188, 203, 220, 0.32)"
+    },
+    surface: {
+      grainAlpha: 0.048,
+      vignetteAlpha: 0.05,
+      washStrength: 0.34,
+      innerFrameAlpha: 0.12,
+      innerFrameInset: 24,
+      titleAccentMix: 0.76,
+      footerLineAlpha: 0.18,
+      footerTextAlpha: 0.88,
+      previewShadow: "0 26px 54px rgba(70, 84, 100, 0.12), 0 2px 18px rgba(255,255,255,0.38) inset"
+    },
+    components: {
+      quoteFillAlpha: 0.05,
+      quoteStrokeAlpha: 0.08,
+      quoteBarAlpha: 0.66,
+      quoteRadius: 22,
+      highlightUnderlineAlpha: 0.44,
+      highlightMarkerAlpha: 0.22,
+      highlightDashAlpha: 0.68
     }
   },
   {
     id: "sage-dawn",
     name: "晨鼠尾草",
-    mood: "柔和青绿",
+    mood: "植物纸面与野外手稿感",
+    preset: "静谧植物手稿",
+    description: "安静青绿、自然纸张、适合复盘随笔",
+    mode: "sage",
     palette: {
-      page: "#f5f1e8",
-      pageAlt: "#e5ede5",
-      text: "#28342d",
-      muted: "#69746e",
-      accent: "#7f9184",
-      accentSoft: "rgba(127, 145, 132, 0.16)",
-      border: "rgba(99, 113, 103, 0.16)",
-      shadow: "rgba(89, 102, 92, 0.16)",
-      glow: "rgba(160, 177, 163, 0.28)"
+      page: "#f4efe5",
+      pageAlt: "#e7dece",
+      text: "#1d2a21",
+      muted: "#657064",
+      accent: "#476a55",
+      accentSoft: "rgba(71, 106, 85, 0.16)",
+      border: "rgba(60, 79, 66, 0.14)",
+      shadow: "rgba(76, 88, 78, 0.12)",
+      glow: "rgba(199, 210, 194, 0.26)"
+    },
+    surface: {
+      grainAlpha: 0.044,
+      vignetteAlpha: 0.05,
+      washStrength: 0.32,
+      innerFrameAlpha: 0.11,
+      innerFrameInset: 24,
+      titleAccentMix: 0.74,
+      footerLineAlpha: 0.18,
+      footerTextAlpha: 0.88,
+      previewShadow: "0 24px 50px rgba(73, 86, 74, 0.12), 0 2px 16px rgba(255,255,255,0.36) inset"
+    },
+    components: {
+      quoteFillAlpha: 0.048,
+      quoteStrokeAlpha: 0.075,
+      quoteBarAlpha: 0.7,
+      quoteRadius: 22,
+      highlightUnderlineAlpha: 0.42,
+      highlightMarkerAlpha: 0.2,
+      highlightDashAlpha: 0.66
     }
   },
   {
     id: "peach-cloud",
     name: "桃云",
-    mood: "暖豆沙",
+    mood: "暖沙旧胶片与生活感",
+    preset: "暖沙复古胶片",
+    description: "暖木暖沙、轻复古、适合情绪和生活内容",
+    mode: "vintage",
     palette: {
-      page: "#f8f1ea",
-      pageAlt: "#efe3de",
-      text: "#3b3036",
-      muted: "#806f75",
-      accent: "#b38e88",
-      accentSoft: "rgba(179, 142, 136, 0.16)",
-      border: "rgba(142, 113, 106, 0.16)",
-      shadow: "rgba(120, 98, 93, 0.16)",
-      glow: "rgba(194, 164, 156, 0.28)"
+      page: "#f6ede3",
+      pageAlt: "#e8d7c8",
+      text: "#392c24",
+      muted: "#7c6a5e",
+      accent: "#a26948",
+      accentSoft: "rgba(162, 105, 72, 0.17)",
+      border: "rgba(106, 78, 58, 0.14)",
+      shadow: "rgba(89, 65, 50, 0.16)",
+      glow: "rgba(220, 188, 164, 0.3)"
+    },
+    surface: {
+      grainAlpha: 0.04,
+      vignetteAlpha: 0.065,
+      washStrength: 0.38,
+      innerFrameAlpha: 0.1,
+      innerFrameInset: 24,
+      titleAccentMix: 0.78,
+      footerLineAlpha: 0.17,
+      footerTextAlpha: 0.9,
+      previewShadow: "0 28px 58px rgba(101, 75, 56, 0.14), 0 10px 34px rgba(255,255,255,0.18) inset"
+    },
+    components: {
+      quoteFillAlpha: 0.06,
+      quoteStrokeAlpha: 0.08,
+      quoteBarAlpha: 0.74,
+      quoteRadius: 24,
+      highlightUnderlineAlpha: 0.48,
+      highlightMarkerAlpha: 0.26,
+      highlightDashAlpha: 0.7
     }
   },
   {
-    id: "classic-newsprint",
-    name: "伦敦独立志",
-    mood: "经典新闻纸",
+    id: "deep-obsidian",
+    name: "深邃曜石",
+    mood: "暗黑画册与金属油墨",
+    preset: "暗黑画册",
+    description: "沉静深灰、暖金点缀、适合商业与科技",
+    mode: "obsidian",
     palette: {
-      page: "#F4F1EA",
-      pageAlt: "#F7F5EF",
-      text: "#2B2A27",
-      muted: "#887e72",
-      accent: "#8D8478",
-      accentSoft: "rgba(141, 132, 120, 0.14)",
-      border: "rgba(193, 190, 181, 0.42)",
-      shadow: "rgba(78, 72, 64, 0.14)",
-      glow: "rgba(242, 238, 227, 0.34)"
+      page: "#141312",
+      pageAlt: "#221f1c",
+      text: "#ece2cf",
+      muted: "#b6a78f",
+      accent: "#d4a04a",
+      accentSoft: "rgba(212, 160, 74, 0.16)",
+      border: "rgba(236, 226, 207, 0.12)",
+      shadow: "rgba(0, 0, 0, 0.32)",
+      glow: "rgba(212, 160, 74, 0.12)"
+    },
+    surface: {
+      grainAlpha: 0.1,
+      vignetteAlpha: 0.22,
+      washStrength: 0.28,
+      innerFrameAlpha: 0.16,
+      innerFrameInset: 22,
+      titleAccentMix: 0.56,
+      footerLineAlpha: 0.28,
+      footerTextAlpha: 0.92,
+      previewShadow: "0 30px 62px rgba(0,0,0,0.3), 0 1px 0 rgba(255,255,255,0.05) inset"
+    },
+    components: {
+      quoteFillAlpha: 0.08,
+      quoteStrokeAlpha: 0.14,
+      quoteBarAlpha: 0.92,
+      quoteRadius: 20,
+      highlightUnderlineAlpha: 0.56,
+      highlightMarkerAlpha: 0.3,
+      highlightDashAlpha: 0.8
     }
   },
   {
-    id: "muted-matcha",
-    name: "京都物语",
-    mood: "安静抹茶纸",
+    id: "swiss-modern",
+    name: "瑞士极简",
+    mood: "硬边网格与现代海报感",
+    preset: "瑞士现代主义",
+    description: "直角几何、强对比、适合结构化表达",
+    mode: "swiss",
     palette: {
-      page: "#EAECE6",
-      pageAlt: "#F1F3EE",
-      text: "#1E2A25",
-      muted: "#738079",
-      accent: "#708076",
-      accentSoft: "rgba(112, 128, 118, 0.12)",
-      border: "rgba(182, 192, 187, 0.44)",
-      shadow: "rgba(76, 89, 80, 0.12)",
-      glow: "rgba(239, 243, 236, 0.36)"
-    }
-  },
-  {
-    id: "warm-nostalgia",
-    name: "午后布拉格",
-    mood: "暖白旧书页",
-    palette: {
-      page: "#F5EBE5",
-      pageAlt: "#FAF4EF",
-      text: "#3A2E28",
-      muted: "#8a7a70",
-      accent: "#A8887B",
-      accentSoft: "rgba(168, 136, 123, 0.12)",
-      border: "rgba(210, 197, 189, 0.44)",
-      shadow: "rgba(101, 77, 67, 0.12)",
-      glow: "rgba(248, 239, 233, 0.34)"
-    }
-  },
-  {
-    id: "cool-editorial",
-    name: "北欧先锋",
-    mood: "冷灰艺术纸",
-    palette: {
-      page: "#E8ECEE",
-      pageAlt: "#F2F5F6",
-      text: "#182232",
-      muted: "#748191",
-      accent: "#72869A",
-      accentSoft: "rgba(114, 134, 154, 0.12)",
-      border: "rgba(184, 195, 204, 0.44)",
-      shadow: "rgba(69, 84, 98, 0.12)",
-      glow: "rgba(238, 243, 246, 0.36)"
+      page: "#f8f7f2",
+      pageAlt: "#f8f7f2",
+      text: "#121212",
+      muted: "#757575",
+      accent: "#1552c4",
+      accentSoft: "rgba(21, 82, 196, 0.12)",
+      border: "rgba(18, 18, 18, 0.2)",
+      shadow: "rgba(18, 18, 18, 0.06)",
+      glow: "rgba(21, 82, 196, 0.08)"
+    },
+    surface: {
+      grainAlpha: 0,
+      vignetteAlpha: 0.02,
+      washStrength: 0,
+      innerFrameAlpha: 0.22,
+      innerFrameInset: 20,
+      titleAccentMix: 0.92,
+      footerLineAlpha: 0.22,
+      footerTextAlpha: 0.92,
+      previewShadow: "0 14px 28px rgba(18,18,18,0.06), 0 0 0 1px rgba(18,18,18,0.12) inset"
+    },
+    components: {
+      quoteFillAlpha: 0.03,
+      quoteStrokeAlpha: 0.1,
+      quoteBarAlpha: 0.94,
+      quoteRadius: 14,
+      highlightUnderlineAlpha: 0.88,
+      highlightMarkerAlpha: 0.22,
+      highlightDashAlpha: 0.92
     }
   }
 ];
@@ -352,6 +458,16 @@ function hexToRgba(hex: string, alpha: number) {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
+function hexToRgb(hex: string) {
+  const value = hex.replace("#", "");
+  if (value.length !== 6) return [36, 52, 70] as const;
+  return [
+    Number.parseInt(value.slice(0, 2), 16),
+    Number.parseInt(value.slice(2, 4), 16),
+    Number.parseInt(value.slice(4, 6), 16)
+  ] as const;
+}
+
 function mixHexColors(fromHex: string, toHex: string, ratio: number) {
   const normalize = (value: string) => value.replace("#", "");
   const from = normalize(fromHex);
@@ -371,6 +487,21 @@ function mixHexColors(fromHex: string, toHex: string, ratio: number) {
   ];
 
   return `rgb(${mix(fromRgb[0], toRgb[0])}, ${mix(fromRgb[1], toRgb[1])}, ${mix(fromRgb[2], toRgb[2])})`;
+}
+
+function getThemeSwatchBackground(theme: ThemeDefinition) {
+  switch (theme.mode) {
+    case "swiss":
+      return `linear-gradient(90deg, ${theme.palette.accent} 0 12px, ${theme.palette.page} 12px 100%)`;
+    case "obsidian":
+      return `radial-gradient(circle at 78% 22%, ${hexToRgba(theme.palette.accent, 0.26)}, transparent 26%), linear-gradient(180deg, ${theme.palette.pageAlt}, ${theme.palette.page})`;
+    case "vintage":
+      return `radial-gradient(circle at 24% 22%, ${theme.palette.glow}, transparent 34%), linear-gradient(180deg, ${theme.palette.pageAlt}, ${theme.palette.page})`;
+    case "sage":
+      return `radial-gradient(circle at 82% 20%, ${theme.palette.glow}, transparent 30%), linear-gradient(180deg, ${theme.palette.pageAlt}, ${theme.palette.page})`;
+    default:
+      return `radial-gradient(circle at 18% 24%, ${theme.palette.glow}, transparent 34%), linear-gradient(180deg, ${theme.palette.pageAlt}, ${theme.palette.page})`;
+  }
 }
 
 function resolveTitleFontFamily(mode: TitleFontMode, isLatin: boolean) {
@@ -536,6 +667,24 @@ function roundRectPath(
   context.arcTo(x + width, y + height, x, y + height, radius);
   context.arcTo(x, y + height, x, y, radius);
   context.arcTo(x, y, x + width, y, radius);
+  context.closePath();
+}
+
+function tracePosterShape(
+  context: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  cardCornerMode: CardCornerMode,
+  radius = 36
+) {
+  if (cardCornerMode === "rounded") {
+    roundRectPath(context, x, y, width, height, radius);
+    return;
+  }
+  context.beginPath();
+  context.rect(x, y, width, height);
   context.closePath();
 }
 
@@ -738,8 +887,8 @@ function measureParagraphBlock(block: ParagraphBlock, fontSize: number, lineHeig
   const quoteWidth = block.kind === "quote" ? maxWidth - 72 : maxWidth;
   const lines = wrapInlineTokensByWidth(parseInlineMarkdown(block.raw), activeFontSize, quoteWidth);
   const textHeight = activeFontSize + Math.max(0, lines.length - 1) * activeLineHeight;
-  const quotePaddingTop = block.kind === "quote" ? Math.max(24, activeFontSize * 0.66) : 0;
-  const quotePaddingBottom = block.kind === "quote" ? Math.max(18, activeFontSize * 0.5) : 0;
+  const quotePaddingTop = block.kind === "quote" ? Math.max(22, activeFontSize * 0.62) : 0;
+  const quotePaddingBottom = block.kind === "quote" ? quotePaddingTop : 0;
   return {
     lines,
     height: block.kind === "quote"
@@ -761,30 +910,31 @@ function drawInlineParagraph(
 ) {
   const isQuote = block.kind === "quote";
   const isSubheading = block.kind === "subheading";
-  const quoteInset = isQuote ? 36 : 0;
+  const quoteInset = isQuote ? (theme.mode === "swiss" ? 44 : 38) : 0;
   const activeFontSize = isSubheading ? Math.round(fontSize * 1.08) : fontSize;
   const activeLineHeight = isSubheading ? lineHeight * 1.02 : lineHeight;
   const quoteWidth = isQuote ? maxWidth - 72 : maxWidth;
   const lines = wrapInlineTokensByWidth(parseInlineMarkdown(block.raw), activeFontSize, quoteWidth);
   const textHeight = activeFontSize + Math.max(0, lines.length - 1) * activeLineHeight;
-  const quotePaddingTop = isQuote ? Math.max(24, activeFontSize * 0.66) : 0;
-  const quotePaddingBottom = isQuote ? Math.max(18, activeFontSize * 0.5) : 0;
+  const quotePaddingTop = isQuote ? Math.max(22, activeFontSize * 0.62) : 0;
+  const quotePaddingBottom = isQuote ? quotePaddingTop : 0;
   const blockHeight = isQuote
     ? quotePaddingTop + textHeight + quotePaddingBottom
     : lines.length * activeLineHeight;
 
   if (isQuote) {
+    const quoteBaseColor = theme.mode === "obsidian" ? theme.palette.text : theme.palette.accent;
     context.save();
-    context.fillStyle = hexToRgba(theme.palette.accent, 0.06);
-    roundRectPath(context, x - 18, y, maxWidth - 8, blockHeight, 18);
+    context.fillStyle = hexToRgba(quoteBaseColor, theme.components.quoteFillAlpha);
+    roundRectPath(context, x - 18, y, maxWidth - 8, blockHeight, theme.components.quoteRadius);
     context.fill();
-    context.strokeStyle = hexToRgba(theme.palette.accent, 0.1);
+    context.strokeStyle = hexToRgba(quoteBaseColor, theme.components.quoteStrokeAlpha);
     context.lineWidth = 1;
     context.stroke();
     context.restore();
 
     context.save();
-    context.fillStyle = theme.palette.accent;
+    context.fillStyle = hexToRgba(theme.palette.accent, theme.components.quoteBarAlpha);
     roundRectPath(context, x - 12, y + 14, 5, Math.max(26, blockHeight - 28), 5);
     context.fill();
     context.restore();
@@ -793,7 +943,7 @@ function drawInlineParagraph(
   lines.forEach((line, lineIndex) => {
     let cursorX = x + quoteInset;
     const baselineY = isQuote
-      ? y + quotePaddingTop + activeFontSize * 0.78 + lineIndex * activeLineHeight
+      ? y + quotePaddingTop + activeFontSize * 0.84 + lineIndex * activeLineHeight
       : y + lineIndex * activeLineHeight;
 
     for (const token of line.tokens) {
@@ -801,7 +951,7 @@ function drawInlineParagraph(
       if (token.mark) {
         context.save();
         if (highlightStyle === "underline") {
-          context.fillStyle = hexToRgba(theme.palette.accent, 0.34);
+          context.fillStyle = hexToRgba(theme.palette.accent, theme.components.highlightUnderlineAlpha);
           roundRectPath(
             context,
             cursorX - 2,
@@ -812,17 +962,17 @@ function drawInlineParagraph(
           );
           context.fill();
         } else if (highlightStyle === "border") {
-          context.strokeStyle = hexToRgba(theme.palette.accent, 0.54);
-          context.lineWidth = 3;
+          context.strokeStyle = hexToRgba(theme.palette.accent, theme.components.highlightDashAlpha);
+          context.lineWidth = 3.2;
           context.lineCap = "round";
-          context.setLineDash([8, 5]);
+          context.setLineDash([10, 5]);
           context.beginPath();
           context.moveTo(cursorX - 1, baselineY + Math.max(5, activeFontSize * 0.12));
           context.lineTo(cursorX + tokenWidth + 1, baselineY + Math.max(5, activeFontSize * 0.12));
           context.stroke();
           context.setLineDash([]);
         } else {
-          context.fillStyle = hexToRgba(theme.palette.accent, 0.24);
+          context.fillStyle = hexToRgba(theme.palette.accent, theme.components.highlightMarkerAlpha);
           context.fillRect(
             cursorX - 2,
             baselineY - activeFontSize * 0.42,
@@ -947,17 +1097,136 @@ function layoutPosterPages(raw: string, manualTitle: string, settings: Typograph
   return pages;
 }
 
-function applyNoiseTexture(context: CanvasRenderingContext2D) {
+function applyNoiseTexture(context: CanvasRenderingContext2D, theme: ThemeDefinition) {
+  if (theme.surface.grainAlpha <= 0) return;
+  const [r, g, b] = hexToRgb(theme.mode === "obsidian" ? theme.palette.text : theme.palette.text);
+  const density = theme.mode === "obsidian" ? 2200 : theme.mode === "vintage" ? 1700 : 1500;
   context.save();
-  context.globalAlpha = 0.02;
-  for (let index = 0; index < 1800; index += 1) {
+  context.globalCompositeOperation = theme.mode === "obsidian" ? "screen" : "multiply";
+  for (let index = 0; index < density; index += 1) {
     const x = Math.random() * PAGE_WIDTH;
     const y = Math.random() * PAGE_HEIGHT;
     const size = Math.random() > 0.92 ? 1.4 : 0.8;
-    const shade = 180 + Math.floor(Math.random() * 40);
-    context.fillStyle = `rgb(${shade}, ${shade}, ${shade})`;
+    const alpha = theme.surface.grainAlpha * (Math.random() > 0.9 ? 1.4 : 0.8);
+    context.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
     context.fillRect(x, y, size, size);
   }
+  context.restore();
+}
+
+function paintPosterAtmosphere(context: CanvasRenderingContext2D, theme: ThemeDefinition) {
+  if (theme.mode === "swiss") {
+    if (theme.surface.vignetteAlpha > 0) {
+      const sideShade = context.createLinearGradient(0, 0, PAGE_WIDTH, 0);
+      sideShade.addColorStop(0, hexToRgba(theme.palette.accent, 0.04));
+      sideShade.addColorStop(0.12, "rgba(255,255,255,0)");
+      sideShade.addColorStop(1, "rgba(255,255,255,0)");
+      context.fillStyle = sideShade;
+      context.fillRect(0, 0, PAGE_WIDTH, PAGE_HEIGHT);
+    }
+    return;
+  }
+
+  context.save();
+  context.globalAlpha = theme.surface.washStrength;
+
+  const topWash = context.createRadialGradient(160, 120, 0, 160, 120, 220);
+  topWash.addColorStop(0, theme.mode === "obsidian" ? hexToRgba(theme.palette.accent, 0.28) : theme.palette.glow);
+  topWash.addColorStop(1, "rgba(255,255,255,0)");
+  context.fillStyle = topWash;
+  context.beginPath();
+  context.arc(160, 120, 220, 0, Math.PI * 2);
+  context.fill();
+
+  const sideWash = context.createRadialGradient(616, 172, 0, 616, 172, 154);
+  sideWash.addColorStop(0, theme.mode === "obsidian" ? hexToRgba(theme.palette.accent, 0.18) : theme.palette.glow);
+  sideWash.addColorStop(1, "rgba(255,255,255,0)");
+  context.fillStyle = sideWash;
+  context.beginPath();
+  context.arc(616, 172, 154, 0, Math.PI * 2);
+  context.fill();
+
+  const bottomWash = context.createRadialGradient(94, 820, 0, 94, 820, 124);
+  bottomWash.addColorStop(0, theme.palette.accentSoft);
+  bottomWash.addColorStop(1, "rgba(255,255,255,0)");
+  context.fillStyle = bottomWash;
+  context.beginPath();
+  context.arc(94, 820, 124, 0, Math.PI * 2);
+  context.fill();
+
+  if (theme.mode === "vintage") {
+    const filmSweep = context.createLinearGradient(0, 0, PAGE_WIDTH, PAGE_HEIGHT);
+    filmSweep.addColorStop(0, hexToRgba(theme.palette.accent, 0.08));
+    filmSweep.addColorStop(0.4, "rgba(255,255,255,0)");
+    filmSweep.addColorStop(1, hexToRgba(theme.palette.pageAlt, 0.18));
+    context.fillStyle = filmSweep;
+    context.fillRect(0, 0, PAGE_WIDTH, PAGE_HEIGHT);
+  }
+
+  if (theme.mode === "obsidian") {
+    const darkVignette = context.createLinearGradient(0, 0, 0, PAGE_HEIGHT);
+    darkVignette.addColorStop(0, "rgba(255,255,255,0.03)");
+    darkVignette.addColorStop(1, "rgba(0,0,0,0.24)");
+    context.fillStyle = darkVignette;
+    context.fillRect(0, 0, PAGE_WIDTH, PAGE_HEIGHT);
+  }
+
+  context.restore();
+
+  const vignette = context.createRadialGradient(
+    PAGE_WIDTH / 2,
+    PAGE_HEIGHT / 2,
+    PAGE_WIDTH * 0.18,
+    PAGE_WIDTH / 2,
+    PAGE_HEIGHT / 2,
+    PAGE_WIDTH * 0.76
+  );
+  vignette.addColorStop(0, "rgba(0,0,0,0)");
+  vignette.addColorStop(1, `rgba(0,0,0,${theme.surface.vignetteAlpha})`);
+  context.fillStyle = vignette;
+  context.fillRect(0, 0, PAGE_WIDTH, PAGE_HEIGHT);
+}
+
+function drawPosterInsetFrame(
+  context: CanvasRenderingContext2D,
+  theme: ThemeDefinition,
+  cardCornerMode: CardCornerMode
+) {
+  if (theme.surface.innerFrameAlpha <= 0) return;
+  const inset = theme.surface.innerFrameInset;
+  context.save();
+  context.lineWidth = theme.mode === "swiss" ? 1.6 : 1;
+  context.strokeStyle = hexToRgba(
+    theme.mode === "obsidian" ? theme.palette.text : theme.palette.text,
+    theme.surface.innerFrameAlpha
+  );
+  tracePosterShape(
+    context,
+    inset,
+    inset,
+    PAGE_WIDTH - inset * 2,
+    PAGE_HEIGHT - inset * 2,
+    cardCornerMode,
+    Math.max(0, 28 - inset * 0.08)
+  );
+  context.stroke();
+  context.restore();
+}
+
+function drawCoverOrnament(
+  context: CanvasRenderingContext2D,
+  theme: ThemeDefinition,
+  metrics: PosterMetrics
+) {
+  if (theme.mode === "swiss") return;
+  context.save();
+  context.fillStyle = theme.mode === "obsidian"
+    ? hexToRgba(theme.palette.text, 0.08)
+    : theme.mode === "vintage"
+      ? hexToRgba(theme.palette.accent, 0.14)
+      : "rgba(255,255,255,0.18)";
+  context.font = `500 ${Math.round(metrics.titleSize * 1.46)}px ${TITLE_FONT_FAMILY}`;
+  context.fillText("“", 58, metrics.titleStartY - Math.max(18, metrics.titleSize * 0.24));
   context.restore();
 }
 
@@ -981,80 +1250,46 @@ async function renderPosterToDataUrl(
 
   const metrics = getPosterMetrics(page, settings);
   context.shadowColor = theme.palette.shadow;
-  context.shadowBlur = 40;
-  context.shadowOffsetY = 24;
+  context.shadowBlur = theme.mode === "swiss" ? 18 : 40;
+  context.shadowOffsetY = theme.mode === "swiss" ? 12 : 24;
 
   const background = context.createLinearGradient(0, 0, 0, PAGE_HEIGHT);
-  background.addColorStop(0, theme.palette.pageAlt);
-  background.addColorStop(1, theme.palette.page);
-
-  if (cardCornerMode === "rounded") {
-    roundRectPath(context, 0, 0, PAGE_WIDTH, PAGE_HEIGHT, 36);
+  if (theme.mode === "obsidian") {
+    background.addColorStop(0, theme.palette.pageAlt);
+    background.addColorStop(0.55, theme.palette.page);
+    background.addColorStop(1, "#0e0d0c");
+  } else if (theme.mode === "swiss") {
+    background.addColorStop(0, theme.palette.page);
+    background.addColorStop(1, theme.palette.page);
   } else {
-    context.beginPath();
-    context.rect(0, 0, PAGE_WIDTH, PAGE_HEIGHT);
+    background.addColorStop(0, theme.palette.pageAlt);
+    background.addColorStop(1, theme.palette.page);
   }
+
+  tracePosterShape(context, 0, 0, PAGE_WIDTH, PAGE_HEIGHT, cardCornerMode, 36);
   context.fillStyle = background;
   context.fill();
 
   context.save();
-  if (cardCornerMode === "rounded") {
-    roundRectPath(context, 0, 0, PAGE_WIDTH, PAGE_HEIGHT, 36);
-  } else {
-    context.beginPath();
-    context.rect(0, 0, PAGE_WIDTH, PAGE_HEIGHT);
-  }
+  tracePosterShape(context, 0, 0, PAGE_WIDTH, PAGE_HEIGHT, cardCornerMode, 36);
   context.clip();
-
-  const vignette = context.createRadialGradient(PAGE_WIDTH / 2, PAGE_HEIGHT / 2, PAGE_WIDTH * 0.18, PAGE_WIDTH / 2, PAGE_HEIGHT / 2, PAGE_WIDTH * 0.72);
-  vignette.addColorStop(0, "rgba(0,0,0,0)");
-  vignette.addColorStop(1, "rgba(0,0,0,0.035)");
-  context.fillStyle = vignette;
-  context.fillRect(0, 0, PAGE_WIDTH, PAGE_HEIGHT);
   context.shadowColor = "transparent";
   context.shadowBlur = 0;
   context.shadowOffsetY = 0;
-
-  const topGlow = context.createRadialGradient(150, 120, 0, 150, 120, 170);
-  topGlow.addColorStop(0, theme.palette.glow);
-  topGlow.addColorStop(1, "rgba(255,255,255,0)");
-  context.fillStyle = topGlow;
-  context.beginPath();
-  context.arc(150, 120, 170, 0, Math.PI * 2);
-  context.fill();
-
-  const sideGlow = context.createRadialGradient(620, 160, 0, 620, 160, 120);
-  sideGlow.addColorStop(0, theme.palette.glow);
-  sideGlow.addColorStop(1, "rgba(255,255,255,0)");
-  context.fillStyle = sideGlow;
-  context.beginPath();
-  context.arc(620, 160, 120, 0, Math.PI * 2);
-  context.fill();
-
-  const bottomGlow = context.createRadialGradient(88, 812, 0, 88, 812, 110);
-  bottomGlow.addColorStop(0, theme.palette.accentSoft);
-  bottomGlow.addColorStop(1, "rgba(255,255,255,0)");
-  context.fillStyle = bottomGlow;
-  context.beginPath();
-  context.arc(88, 812, 110, 0, Math.PI * 2);
-  context.fill();
-
-  applyNoiseTexture(context);
+  paintPosterAtmosphere(context, theme);
+  applyNoiseTexture(context, theme);
+  drawPosterInsetFrame(context, theme, cardCornerMode);
   context.restore();
 
   if (page.kind === "cover" && page.title.trim()) {
     const titleLineWidths = metrics.titleLines.map((line) => measureTitleText(line, metrics.titleSize, settings.titleFontMode));
     const accentRanges = metrics.titleAccentRanges;
-    const titleAccentColor = mixHexColors(theme.palette.text, theme.palette.accent, 0.62);
+    const titleAccentColor = mixHexColors(theme.palette.text, theme.palette.accent, theme.surface.titleAccentMix);
+
+    drawCoverOrnament(context, theme, metrics);
 
     context.save();
-    context.fillStyle = "rgba(255,255,255,0.18)";
-    context.font = `500 ${Math.round(metrics.titleSize * 1.46)}px ${TITLE_FONT_FAMILY}`;
-    context.fillText("“", 58, metrics.titleStartY - Math.max(18, metrics.titleSize * 0.24));
-    context.restore();
-
-    context.save();
-    context.globalCompositeOperation = "multiply";
+    context.globalCompositeOperation = theme.mode === "obsidian" ? "screen" : "multiply";
     let titleCharOffset = 0;
     metrics.titleLines.forEach((line, lineIndex) => {
       const lineX = lineIndex === 1 && metrics.titleLines.length > 1
@@ -1103,14 +1338,14 @@ async function renderPosterToDataUrl(
     paragraphY += height + gap;
   });
 
-  context.strokeStyle = "rgba(90, 98, 108, 0.18)";
+  context.strokeStyle = hexToRgba(theme.palette.text, theme.surface.footerLineAlpha);
   context.lineWidth = 1;
   context.beginPath();
   context.moveTo(FOOTER_LINE_LEFT, FOOTER_LINE_Y);
   context.lineTo(FOOTER_LINE_RIGHT, FOOTER_LINE_Y);
   context.stroke();
 
-  context.fillStyle = "rgba(79, 89, 102, 0.88)";
+  context.fillStyle = hexToRgba(theme.palette.text, theme.surface.footerTextAlpha);
   context.font = `600 14px ${BODY_FONT_FAMILY}`;
   context.fillText(footerLeft.trim() || "困困", CONTENT_LEFT, FOOTER_TEXT_Y);
 
@@ -1258,7 +1493,7 @@ export default function HomePage() {
                   className="text-area text-area--title"
                   value={manualTitle}
                   onChange={(event) => setManualTitle(event.target.value)}
-                  placeholder="留空则不显示标题，只排正文；回车可手动换行"
+                  placeholder="留空则不显示标题，只排正文；回车可手动换行；**重点词** 可异色强调"
                 />
               </div>
 
@@ -1279,28 +1514,41 @@ export default function HomePage() {
           ) : (
             <>
               <details className="accordion-section" open>
-                <summary className="accordion-summary">✦ 主题风格</summary>
+                <summary className="accordion-summary">✦ 排版风格预设</summary>
                 <div className="section-head section-head--inside">
-                  <span>当前主题</span>
-                  <span className="section-meta">{theme.mood}</span>
+                  <span>当前预设</span>
+                  <span className="section-meta">{theme.preset}</span>
                 </div>
                 <div className="theme-list">
                   {THEMES.map((item) => {
                     const isActive = item.id === themeId;
                     return (
-                      <button key={item.id} type="button" className={`theme-card${isActive ? " active" : ""}`} onClick={() => setThemeId(item.id)}>
+                      <button
+                        key={item.id}
+                        type="button"
+                        className={`theme-card${isActive ? " active" : ""}`}
+                        onClick={() => setThemeId(item.id)}
+                        style={isActive ? { borderColor: item.palette.accent, boxShadow: `0 16px 32px ${hexToRgba(item.palette.accent, 0.14)}` } : undefined}
+                      >
                         <span
                           className="theme-swatch"
                           style={{
-                            background: `radial-gradient(circle at 18% 30%, ${item.palette.glow}, transparent 35%), linear-gradient(180deg, ${item.palette.pageAlt}, ${item.palette.page})`,
+                            background: getThemeSwatchBackground(item),
                             boxShadow: `inset 0 0 0 1px ${item.palette.border}`
                           }}
                         >
+                          <span className="theme-swatch-preset" style={{ color: item.mode === "obsidian" ? hexToRgba(item.palette.text, 0.82) : item.palette.muted }}>
+                            {item.preset}
+                          </span>
                           <span className="theme-swatch-name" style={{ color: item.palette.text }}>
                             {item.name}
                           </span>
                         </span>
-                        <span className="theme-card-check" aria-hidden="true">{isActive ? "✓" : ""}</span>
+                        <span className="theme-card-copy">
+                          <strong>{item.name}</strong>
+                          <span>{item.description}</span>
+                        </span>
+                        <span className="theme-card-check" style={{ background: item.palette.accent }} aria-hidden="true">{isActive ? "✓" : ""}</span>
                       </button>
                     );
                   })}
@@ -1409,7 +1657,13 @@ export default function HomePage() {
                     key={item.id}
                     type="button"
                     className={`theme-dot${item.id === themeId ? " active" : ""}`}
-                    style={{ background: `linear-gradient(180deg, ${item.palette.pageAlt}, ${item.palette.page})` }}
+                    style={{
+                      background: getThemeSwatchBackground(item),
+                      borderColor: item.id === themeId ? item.palette.accent : undefined,
+                      boxShadow: item.id === themeId
+                        ? `0 0 0 4px ${hexToRgba(item.palette.accent, 0.16)}`
+                        : "0 4px 10px rgba(78, 90, 99, 0.08)"
+                    }}
                     onClick={() => setThemeId(item.id)}
                     aria-label={`切换到${item.name}`}
                     title={item.name}
@@ -1423,7 +1677,15 @@ export default function HomePage() {
           <div className="poster-grid">
             {pages.map((page, index) => (
               <article key={page.id} className="poster-wrap">
-                <div className="poster-preview-stage" style={{ borderRadius: cardCornerMode === "rounded" ? 30 : 0 }}>
+                <div
+                  className="poster-preview-stage"
+                  style={{
+                    borderRadius: cardCornerMode === "rounded" ? 30 : 0,
+                    boxShadow: theme.surface.previewShadow,
+                    borderColor: theme.palette.border,
+                    background: theme.palette.pageAlt
+                  }}
+                >
                   {previewUrls[index] ? (
                     <img className="poster-preview-image" src={previewUrls[index]} alt={`第 ${index + 1} 页预览`} />
                   ) : (

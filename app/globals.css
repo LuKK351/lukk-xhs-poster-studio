@@ -352,20 +352,45 @@ button:disabled {
 }
 
 .theme-swatch {
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   width: 100%;
-  height: 72px;
+  height: 86px;
   border-radius: 13px;
-  padding: 10px;
+  padding: 12px;
   overflow: hidden;
 }
 
 .theme-swatch-name {
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 700;
   letter-spacing: -0.03em;
-  text-align: center;
+  line-height: 1;
+}
+
+.theme-swatch-preset {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.theme-card-copy {
+  display: grid;
+  gap: 3px;
+  margin-top: 10px;
+}
+
+.theme-card-copy strong {
+  font-size: 14px;
+  color: #203244;
+}
+
+.theme-card-copy span {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #6d7b89;
 }
 
 .theme-card-check {
@@ -408,16 +433,14 @@ button:disabled {
 }
 
 .theme-dot {
-  width: 18px;
-  height: 18px;
-  border-radius: 999px;
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
   border: 1px solid rgba(87, 102, 117, 0.18);
-  box-shadow: 0 4px 10px rgba(78, 90, 99, 0.08);
 }
 
 .theme-dot.active {
   border-color: var(--accent);
-  box-shadow: 0 0 0 4px rgba(63, 107, 152, 0.12);
 }
 
 .preview-head h2 {
@@ -454,7 +477,6 @@ button:disabled {
   overflow: hidden;
   background: rgba(255, 255, 255, 0.46);
   border: 1px solid rgba(87, 102, 117, 0.08);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08), 0 4px 18px rgba(255, 255, 255, 0.42) inset;
 }
 
 .poster-preview-image {
