@@ -118,7 +118,7 @@ const THEMES: ThemeDefinition[] = [
       washStrength: 0.34,
       innerFrameAlpha: 0.12,
       innerFrameInset: 24,
-      titleAccentMix: 0.9,
+      titleAccentMix: 0.68,
       footerLineAlpha: 0.18,
       footerTextAlpha: 0.88,
       previewShadow: "0 26px 54px rgba(70, 84, 100, 0.12), 0 2px 18px rgba(255,255,255,0.38) inset"
@@ -157,7 +157,7 @@ const THEMES: ThemeDefinition[] = [
       washStrength: 0.32,
       innerFrameAlpha: 0.11,
       innerFrameInset: 24,
-      titleAccentMix: 0.88,
+      titleAccentMix: 0.64,
       footerLineAlpha: 0.18,
       footerTextAlpha: 0.88,
       previewShadow: "0 24px 50px rgba(73, 86, 74, 0.12), 0 2px 16px rgba(255,255,255,0.36) inset"
@@ -196,7 +196,7 @@ const THEMES: ThemeDefinition[] = [
       washStrength: 0.38,
       innerFrameAlpha: 0.1,
       innerFrameInset: 24,
-      titleAccentMix: 0.92,
+      titleAccentMix: 0.6,
       footerLineAlpha: 0.17,
       footerTextAlpha: 0.9,
       previewShadow: "0 28px 58px rgba(101, 75, 56, 0.14), 0 10px 34px rgba(255,255,255,0.18) inset"
@@ -235,7 +235,7 @@ const THEMES: ThemeDefinition[] = [
       washStrength: 0.28,
       innerFrameAlpha: 0.16,
       innerFrameInset: 22,
-      titleAccentMix: 0.72,
+      titleAccentMix: 0.76,
       footerLineAlpha: 0.28,
       footerTextAlpha: 0.92,
       previewShadow: "0 30px 62px rgba(0,0,0,0.3), 0 1px 0 rgba(255,255,255,0.05) inset"
@@ -274,7 +274,7 @@ const THEMES: ThemeDefinition[] = [
       washStrength: 0,
       innerFrameAlpha: 0.22,
       innerFrameInset: 20,
-      titleAccentMix: 0.98,
+      titleAccentMix: 0.86,
       footerLineAlpha: 0.22,
       footerTextAlpha: 0.92,
       previewShadow: "0 14px 28px rgba(18,18,18,0.06), 0 0 0 1px rgba(18,18,18,0.12) inset"
@@ -731,7 +731,6 @@ function drawTitleLine(
     accentRanges?: TextRange[];
     normalColor?: string;
     accentColor?: string;
-    accentShadowColor?: string;
     accentWeight?: number;
   }
 ) {
@@ -751,12 +750,6 @@ function drawTitleLine(
       );
       const activeWeight = isAccent ? (options?.accentWeight ?? Math.min(titleWeight + 100, 700)) : titleWeight;
       context.font = `${activeWeight} ${size}px ${resolveTitleFontFamily(mode, isLatin)}`;
-      if (isAccent && options?.accentShadowColor) {
-        context.save();
-        context.fillStyle = options.accentShadowColor;
-        context.fillText(char, cursorX + 0.8, y + Math.max(1.4, size * 0.018));
-        context.restore();
-      }
       context.fillStyle = isAccent ? (options?.accentColor ?? context.fillStyle) : (options?.normalColor ?? context.fillStyle);
       context.fillText(char, cursorX, y);
       cursorX += context.measureText(char).width;
@@ -1297,9 +1290,6 @@ async function renderPosterToDataUrl(
     const titleLineWidths = metrics.titleLines.map((line) => measureTitleText(line, metrics.titleSize, settings.titleFontMode));
     const accentRanges = metrics.titleAccentRanges;
     const titleAccentColor = mixHexColors(theme.palette.text, theme.palette.accent, theme.surface.titleAccentMix);
-    const titleAccentShadowColor = theme.mode === "obsidian"
-      ? hexToRgba(theme.palette.accent, 0.18)
-      : hexToRgba(theme.palette.accent, 0.16);
     const titleAccentWeight = settings.titleFontMode === "sans" ? 700 : 600;
 
     drawCoverOrnament(context, theme, metrics);
@@ -1323,7 +1313,6 @@ async function renderPosterToDataUrl(
           accentRanges,
           normalColor: theme.palette.text,
           accentColor: titleAccentColor,
-          accentShadowColor: titleAccentShadowColor,
           accentWeight: titleAccentWeight
         }
       );
