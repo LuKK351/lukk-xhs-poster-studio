@@ -8,7 +8,7 @@ type ThemeDefinition = {
   mood: string;
   preset: string;
   description: string;
-  mode: "mist" | "sage" | "vintage" | "obsidian" | "swiss";
+  mode: "paper" | "sage" | "vintage" | "obsidian" | "archive" | "swiss";
   palette: {
     page: string;
     pageAlt: string;
@@ -95,42 +95,81 @@ type ParagraphBlock = {
 
 const THEMES: ThemeDefinition[] = [
   {
-    id: "mist-lake",
-    name: "雾湖",
-    mood: "冷纸感与雾蓝墨色",
-    preset: "冷淡纸质书",
-    description: "冷感纸面、雾蓝油墨、适合知性分析",
-    mode: "mist",
+    id: "moss-paper",
+    name: "苔绿纸书",
+    mood: "浅苔纸面与出版物墨感",
+    preset: "浅底苔绿纸书",
+    description: "浅苔纸面、安静高级，适合默认长期使用",
+    mode: "paper",
     palette: {
-      page: "#f2f4f5",
-      pageAlt: "#e5ebef",
-      text: "#203244",
-      muted: "#647586",
-      accent: "#56789c",
-      accentSoft: "rgba(86, 120, 156, 0.16)",
-      border: "rgba(57, 76, 96, 0.15)",
-      shadow: "rgba(74, 88, 103, 0.14)",
-      glow: "rgba(188, 203, 220, 0.32)"
+      page: "#f3f1ea",
+      pageAlt: "#e6ebdf",
+      text: "#1f2b22",
+      muted: "#667368",
+      accent: "#566f57",
+      accentSoft: "rgba(86, 111, 87, 0.14)",
+      border: "rgba(63, 77, 66, 0.12)",
+      shadow: "rgba(63, 77, 66, 0.12)",
+      glow: "rgba(206, 215, 201, 0.34)"
     },
     surface: {
-      grainAlpha: 0.048,
-      vignetteAlpha: 0.05,
-      washStrength: 0.34,
-      innerFrameAlpha: 0.12,
+      grainAlpha: 0.03,
+      vignetteAlpha: 0.038,
+      washStrength: 0.28,
+      innerFrameAlpha: 0.11,
       innerFrameInset: 24,
-      titleAccentMix: 0.68,
-      footerLineAlpha: 0.18,
-      footerTextAlpha: 0.88,
-      previewShadow: "0 26px 54px rgba(70, 84, 100, 0.12), 0 2px 18px rgba(255,255,255,0.38) inset"
+      titleAccentMix: 0.62,
+      footerLineAlpha: 0.2,
+      footerTextAlpha: 0.9,
+      previewShadow: "0 26px 54px rgba(57, 72, 60, 0.11), 0 2px 18px rgba(255,255,255,0.42) inset"
     },
     components: {
-      quoteFillAlpha: 0.05,
-      quoteStrokeAlpha: 0.08,
-      quoteBarAlpha: 0.66,
+      quoteFillAlpha: 0.042,
+      quoteStrokeAlpha: 0.074,
+      quoteBarAlpha: 0.72,
       quoteRadius: 22,
-      highlightUnderlineAlpha: 0.44,
+      highlightUnderlineAlpha: 0.48,
       highlightMarkerAlpha: 0.22,
-      highlightDashAlpha: 0.68
+      highlightDashAlpha: 0.72
+    }
+  },
+  {
+    id: "forest-archive",
+    name: "森林档案",
+    mood: "深林墨绿与收藏级画册气质",
+    preset: "深底森林档案",
+    description: "深绿画册、暖米字色，适合特别篇与情绪款",
+    mode: "archive",
+    palette: {
+      page: "#18211b",
+      pageAlt: "#243128",
+      text: "#ebe1cf",
+      muted: "#c1b5a1",
+      accent: "#8ea58d",
+      accentSoft: "rgba(142, 165, 141, 0.15)",
+      border: "rgba(235, 225, 207, 0.12)",
+      shadow: "rgba(0, 0, 0, 0.34)",
+      glow: "rgba(151, 171, 148, 0.1)"
+    },
+    surface: {
+      grainAlpha: 0.07,
+      vignetteAlpha: 0.16,
+      washStrength: 0.22,
+      innerFrameAlpha: 0.14,
+      innerFrameInset: 22,
+      titleAccentMix: 0.64,
+      footerLineAlpha: 0.24,
+      footerTextAlpha: 0.92,
+      previewShadow: "0 30px 62px rgba(0,0,0,0.28), 0 1px 0 rgba(255,255,255,0.04) inset"
+    },
+    components: {
+      quoteFillAlpha: 0.072,
+      quoteStrokeAlpha: 0.12,
+      quoteBarAlpha: 0.9,
+      quoteRadius: 20,
+      highlightUnderlineAlpha: 0.56,
+      highlightMarkerAlpha: 0.24,
+      highlightDashAlpha: 0.76
     }
   },
   {
@@ -493,15 +532,23 @@ function getThemeSwatchBackground(theme: ThemeDefinition) {
   switch (theme.mode) {
     case "swiss":
       return `linear-gradient(90deg, ${theme.palette.accent} 0 12px, ${theme.palette.page} 12px 100%)`;
+    case "archive":
+      return `radial-gradient(circle at 78% 22%, ${hexToRgba(theme.palette.accent, 0.22)}, transparent 24%), linear-gradient(180deg, ${theme.palette.pageAlt}, ${theme.palette.page})`;
     case "obsidian":
       return `radial-gradient(circle at 78% 22%, ${hexToRgba(theme.palette.accent, 0.26)}, transparent 26%), linear-gradient(180deg, ${theme.palette.pageAlt}, ${theme.palette.page})`;
     case "vintage":
       return `radial-gradient(circle at 24% 22%, ${theme.palette.glow}, transparent 34%), linear-gradient(180deg, ${theme.palette.pageAlt}, ${theme.palette.page})`;
     case "sage":
       return `radial-gradient(circle at 82% 20%, ${theme.palette.glow}, transparent 30%), linear-gradient(180deg, ${theme.palette.pageAlt}, ${theme.palette.page})`;
+    case "paper":
+      return `radial-gradient(circle at 24% 18%, ${theme.palette.glow}, transparent 32%), linear-gradient(180deg, ${theme.palette.pageAlt}, ${theme.palette.page})`;
     default:
       return `radial-gradient(circle at 18% 24%, ${theme.palette.glow}, transparent 34%), linear-gradient(180deg, ${theme.palette.pageAlt}, ${theme.palette.page})`;
   }
+}
+
+function isDarkPosterTheme(theme: ThemeDefinition) {
+  return theme.mode === "obsidian" || theme.mode === "archive";
 }
 
 function resolveTitleFontFamily(mode: TitleFontMode, isLatin: boolean) {
@@ -932,7 +979,7 @@ function drawInlineParagraph(
     : lines.length * activeLineHeight;
 
   if (isQuote) {
-    const quoteBaseColor = theme.mode === "obsidian" ? theme.palette.text : theme.palette.accent;
+    const quoteBaseColor = isDarkPosterTheme(theme) ? theme.palette.text : theme.palette.accent;
     context.save();
     context.fillStyle = hexToRgba(quoteBaseColor, theme.components.quoteFillAlpha);
     roundRectPath(context, x - 18, y, maxWidth - 8, blockHeight, theme.components.quoteRadius);
@@ -993,7 +1040,7 @@ function drawInlineParagraph(
       }
       context.save();
       const weight = isSubheading ? 600 : token.mark ? 600 : token.bold ? 500 : isQuote ? 400 : 300;
-      context.globalCompositeOperation = theme.mode === "obsidian" ? "screen" : "multiply";
+      context.globalCompositeOperation = isDarkPosterTheme(theme) ? "screen" : "multiply";
       context.font = `${weight} ${activeFontSize}px ${BODY_FONT_FAMILY}`;
       context.fillStyle = theme.palette.text;
       context.fillText(token.text, cursorX, baselineY);
@@ -1104,10 +1151,10 @@ function layoutPosterPages(raw: string, manualTitle: string, settings: Typograph
 
 function applyNoiseTexture(context: CanvasRenderingContext2D, theme: ThemeDefinition) {
   if (theme.surface.grainAlpha <= 0) return;
-  const [r, g, b] = hexToRgb(theme.mode === "obsidian" ? theme.palette.text : theme.palette.text);
-  const density = theme.mode === "obsidian" ? 2200 : theme.mode === "vintage" ? 1700 : 1500;
+  const [r, g, b] = hexToRgb(theme.palette.text);
+  const density = isDarkPosterTheme(theme) ? 2200 : theme.mode === "vintage" ? 1700 : theme.mode === "paper" ? 1900 : 1500;
   context.save();
-  context.globalCompositeOperation = theme.mode === "obsidian" ? "screen" : "multiply";
+  context.globalCompositeOperation = isDarkPosterTheme(theme) ? "screen" : "multiply";
   for (let index = 0; index < density; index += 1) {
     const x = Math.random() * PAGE_WIDTH;
     const y = Math.random() * PAGE_HEIGHT;
@@ -1136,7 +1183,7 @@ function paintPosterAtmosphere(context: CanvasRenderingContext2D, theme: ThemeDe
   context.globalAlpha = theme.surface.washStrength;
 
   const topWash = context.createRadialGradient(160, 120, 0, 160, 120, 220);
-  topWash.addColorStop(0, theme.mode === "obsidian" ? hexToRgba(theme.palette.accent, 0.28) : theme.palette.glow);
+  topWash.addColorStop(0, isDarkPosterTheme(theme) ? hexToRgba(theme.palette.accent, theme.mode === "archive" ? 0.2 : 0.28) : theme.palette.glow);
   topWash.addColorStop(1, "rgba(255,255,255,0)");
   context.fillStyle = topWash;
   context.beginPath();
@@ -1144,7 +1191,7 @@ function paintPosterAtmosphere(context: CanvasRenderingContext2D, theme: ThemeDe
   context.fill();
 
   const sideWash = context.createRadialGradient(616, 172, 0, 616, 172, 154);
-  sideWash.addColorStop(0, theme.mode === "obsidian" ? hexToRgba(theme.palette.accent, 0.18) : theme.palette.glow);
+  sideWash.addColorStop(0, isDarkPosterTheme(theme) ? hexToRgba(theme.palette.accent, theme.mode === "archive" ? 0.14 : 0.18) : theme.palette.glow);
   sideWash.addColorStop(1, "rgba(255,255,255,0)");
   context.fillStyle = sideWash;
   context.beginPath();
@@ -1168,10 +1215,19 @@ function paintPosterAtmosphere(context: CanvasRenderingContext2D, theme: ThemeDe
     context.fillRect(0, 0, PAGE_WIDTH, PAGE_HEIGHT);
   }
 
-  if (theme.mode === "obsidian") {
+  if (theme.mode === "paper") {
+    const paperBloom = context.createLinearGradient(0, 0, PAGE_WIDTH, PAGE_HEIGHT);
+    paperBloom.addColorStop(0, hexToRgba(theme.palette.pageAlt, 0.08));
+    paperBloom.addColorStop(0.35, "rgba(255,255,255,0)");
+    paperBloom.addColorStop(1, hexToRgba(theme.palette.accent, 0.04));
+    context.fillStyle = paperBloom;
+    context.fillRect(0, 0, PAGE_WIDTH, PAGE_HEIGHT);
+  }
+
+  if (isDarkPosterTheme(theme)) {
     const darkVignette = context.createLinearGradient(0, 0, 0, PAGE_HEIGHT);
-    darkVignette.addColorStop(0, "rgba(255,255,255,0.03)");
-    darkVignette.addColorStop(1, "rgba(0,0,0,0.24)");
+    darkVignette.addColorStop(0, theme.mode === "archive" ? "rgba(255,255,255,0.02)" : "rgba(255,255,255,0.03)");
+    darkVignette.addColorStop(1, theme.mode === "archive" ? "rgba(0,0,0,0.18)" : "rgba(0,0,0,0.24)");
     context.fillStyle = darkVignette;
     context.fillRect(0, 0, PAGE_WIDTH, PAGE_HEIGHT);
   }
@@ -1202,7 +1258,7 @@ function drawPosterInsetFrame(
   context.save();
   context.lineWidth = theme.mode === "swiss" ? 1.6 : 1;
   context.strokeStyle = hexToRgba(
-    theme.mode === "obsidian" ? theme.palette.text : theme.palette.text,
+    theme.palette.text,
     theme.surface.innerFrameAlpha
   );
   tracePosterShape(
@@ -1225,9 +1281,11 @@ function drawCoverOrnament(
 ) {
   if (theme.mode === "swiss") return;
   context.save();
-  context.fillStyle = theme.mode === "obsidian"
+  context.fillStyle = isDarkPosterTheme(theme)
     ? hexToRgba(theme.palette.text, 0.08)
-    : theme.mode === "vintage"
+    : theme.mode === "paper"
+      ? hexToRgba(theme.palette.text, 0.06)
+      : theme.mode === "vintage"
       ? hexToRgba(theme.palette.accent, 0.14)
       : "rgba(255,255,255,0.18)";
   context.font = `500 ${Math.round(metrics.titleSize * 1.46)}px ${TITLE_FONT_FAMILY}`;
@@ -1259,7 +1317,11 @@ async function renderPosterToDataUrl(
   context.shadowOffsetY = theme.mode === "swiss" ? 12 : 24;
 
   const background = context.createLinearGradient(0, 0, 0, PAGE_HEIGHT);
-  if (theme.mode === "obsidian") {
+  if (theme.mode === "archive") {
+    background.addColorStop(0, theme.palette.pageAlt);
+    background.addColorStop(0.58, theme.palette.page);
+    background.addColorStop(1, "#101713");
+  } else if (theme.mode === "obsidian") {
     background.addColorStop(0, theme.palette.pageAlt);
     background.addColorStop(0.55, theme.palette.page);
     background.addColorStop(1, "#0e0d0c");
@@ -1295,7 +1357,18 @@ async function renderPosterToDataUrl(
     drawCoverOrnament(context, theme, metrics);
 
     context.save();
-    context.globalCompositeOperation = theme.mode === "obsidian" ? "screen" : "multiply";
+    context.globalCompositeOperation = isDarkPosterTheme(theme) ? "screen" : "multiply";
+    if (theme.mode === "paper") {
+      context.shadowColor = "rgba(255,255,255,0.34)";
+      context.shadowBlur = 0;
+      context.shadowOffsetX = 0;
+      context.shadowOffsetY = 1;
+    } else if (theme.mode === "archive") {
+      context.shadowColor = "rgba(0,0,0,0.24)";
+      context.shadowBlur = 0;
+      context.shadowOffsetX = 0;
+      context.shadowOffsetY = 1;
+    }
     let titleCharOffset = 0;
     metrics.titleLines.forEach((line, lineIndex) => {
       const lineX = lineIndex === 1 && metrics.titleLines.length > 1
@@ -1360,7 +1433,9 @@ async function renderPosterToDataUrl(
   if (rightText) {
     context.save();
     context.textAlign = "right";
-    context.font = `600 14px ${BODY_FONT_FAMILY}`;
+    context.font = theme.mode === "paper" || theme.mode === "archive"
+      ? `600 18px Georgia, 'Times New Roman', serif`
+      : `600 14px ${BODY_FONT_FAMILY}`;
     context.fillText(rightText, CONTENT_RIGHT, FOOTER_TEXT_Y);
     context.restore();
   }
@@ -1540,7 +1615,7 @@ export default function HomePage() {
                             boxShadow: `inset 0 0 0 1px ${item.palette.border}`
                           }}
                         >
-                          <span className="theme-swatch-preset" style={{ color: item.mode === "obsidian" ? hexToRgba(item.palette.text, 0.82) : item.palette.muted }}>
+                          <span className="theme-swatch-preset" style={{ color: item.mode === "obsidian" || item.mode === "archive" ? hexToRgba(item.palette.text, 0.82) : item.palette.muted }}>
                             {item.preset}
                           </span>
                           <span className="theme-swatch-name" style={{ color: item.palette.text }}>
