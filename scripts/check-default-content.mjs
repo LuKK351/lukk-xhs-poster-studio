@@ -58,6 +58,15 @@ assert.match(pageSource, /id:\s*"warm-editor"[\s\S]*?preset:\s*"冷灰效率编�
 assert.match(pageSource, /id:\s*"warm-editor"[\s\S]*?page:\s*"#f8f9fa"/i, "warm editor background should be clean cool gray-white");
 assert.match(pageSource, /id:\s*"warm-editor"[\s\S]*?accent:\s*"#BAF13C"/, "warm editor should use a saturated efficiency green");
 assert.match(pageSource, /id:\s*"warm-editor"[\s\S]*?quoteTreatment:\s*"callout"/, "warm gray editorial theme should use callout quotes");
+assert.match(pageSource, /id:\s*"lemon-note"[\s\S]*?name:\s*"暖阳香草"/, "yellow editorial theme should be available");
+assert.match(pageSource, /id:\s*"lemon-note"[\s\S]*?mode:\s*"swiss"/, "yellow editorial theme should use a flat modern surface");
+assert.match(pageSource, /id:\s*"lemon-note"[\s\S]*?page:\s*"#fdfbf7"/i, "yellow editorial theme should use a clean vanilla-white background");
+assert.match(pageSource, /id:\s*"lemon-note"[\s\S]*?pageAlt:\s*"#fdfbf7"/i, "yellow editorial theme should avoid dirty background gradients");
+assert.match(pageSource, /id:\s*"lemon-note"[\s\S]*?accent:\s*"#f6b21a"/i, "yellow editorial theme should use a warm honey-yellow annotation accent");
+assert.match(pageSource, /id:\s*"lemon-note"[\s\S]*?grainAlpha:\s*0[\s\S]*?vignetteAlpha:\s*0[\s\S]*?washStrength:\s*0/, "yellow editorial theme should avoid aged-paper texture and vignette");
+assert.match(pageSource, /id:\s*"lemon-note"[\s\S]*?quoteTreatment:\s*"paper"/, "yellow note theme should use a honey-tinted quote block");
+assert.match(pageSource, /id:\s*"lemon-note"[\s\S]*?highlightTreatment:\s*"warmSwipe"/, "yellow editorial theme should use marker-like yellow highlights");
+assert.match(pageSource, /id:\s*"lemon-note"[\s\S]*?highlightMarkerAlpha:\s*0\.24/, "yellow editorial highlights should stay translucent instead of muddy");
 assert.match(pageSource, /type TitleFontMode = "serif" \| "kai" \| "sans" \| "retroSerif";/, "title font modes should include optional retro serif style");
 assert.match(pageSource, /type QuoteTreatment = "paper" \| "callout" \| "code";/, "quote block treatments should be explicit");
 assert.match(pageSource, /type HighlightTreatment = "softUnderline" \| "editorMark" \| "botanicalStroke" \| "warmSwipe" \| "darkGlow" \| "swissRule";/, "highlight treatments should be theme-specific");

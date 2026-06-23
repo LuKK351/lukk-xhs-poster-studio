@@ -219,6 +219,55 @@ const THEMES: ThemeDefinition[] = [
     }
   },
   {
+    id: "lemon-note",
+    name: "暖阳香草",
+    mood: "香草奶油白与蜂蜜黄标记",
+    preset: "暖阳香草黄标",
+    description: "奶油白底、半透明蜂蜜黄高亮，适合清爽说明和观点拆解",
+    tags: ["清爽", "黄标"],
+    mode: "swiss",
+    palette: {
+      page: "#fdfbf7",
+      pageAlt: "#fdfbf7",
+      text: "#17140e",
+      muted: "#746957",
+      accent: "#f6b21a",
+      accentSoft: "rgba(246, 178, 26, 0.16)",
+      border: "rgba(23, 20, 14, 0.12)",
+      shadow: "rgba(98, 72, 22, 0.1)",
+      glow: "rgba(250, 204, 21, 0.12)"
+    },
+    surface: {
+      grainAlpha: 0,
+      vignetteAlpha: 0,
+      washStrength: 0,
+      innerFrameAlpha: 0.11,
+      innerFrameInset: 20,
+      titleAccentMix: 0.86,
+      footerLineAlpha: 0.18,
+      footerTextAlpha: 0.92,
+      previewShadow: "0 18px 36px rgba(98, 72, 22, 0.1), 0 0 0 1px rgba(23,20,14,0.08) inset"
+    },
+    components: {
+      quoteFillAlpha: 0.09,
+      quoteStrokeAlpha: 0.14,
+      quoteBarAlpha: 0.88,
+      quoteRadius: 12,
+      quoteTreatment: "paper",
+      highlightTreatment: "warmSwipe",
+      highlightUnderlineAlpha: 0.62,
+      highlightMarkerAlpha: 0.24,
+      highlightDashAlpha: 0.78
+    },
+    editor: {
+      titleSize: 75,
+      bodySize: 30,
+      lineHeight: 1.84,
+      titleFontMode: "serif",
+      highlightStyle: "marker"
+    }
+  },
+  {
     id: "forest-archive",
     name: "森林档案",
     mood: "深林墨绿与收藏级画册气质",
