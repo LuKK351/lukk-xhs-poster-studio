@@ -63,14 +63,14 @@ needs_build() {
   return 1
 }
 
+stop_existing_server
+
 if needs_build; then
   if ! npm run build >"$BUILD_LOG" 2>&1; then
     show_failure_and_wait "构建失败，未能启动小红书卡片工具。" "$BUILD_LOG"
     exit 1
   fi
 fi
-
-stop_existing_server
 
 (
   for _ in $(seq 1 30); do

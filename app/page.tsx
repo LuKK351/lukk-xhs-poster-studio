@@ -8,6 +8,7 @@ type ThemeDefinition = {
   mood: string;
   preset: string;
   description: string;
+  tags: string[];
   mode: "paper" | "sage" | "vintage" | "obsidian" | "archive" | "swiss";
   palette: {
     page: string;
@@ -36,6 +37,8 @@ type ThemeDefinition = {
     quoteStrokeAlpha: number;
     quoteBarAlpha: number;
     quoteRadius: number;
+    quoteTreatment: QuoteTreatment;
+    highlightTreatment: HighlightTreatment;
     highlightUnderlineAlpha: number;
     highlightMarkerAlpha: number;
     highlightDashAlpha: number;
@@ -66,8 +69,10 @@ type TypographySettings = {
 type FooterRightMode = "auto" | "blank" | "page" | "date";
 type CardCornerMode = "rounded" | "square";
 type SidebarTab = "content" | "style";
-type TitleFontMode = "serif" | "kai" | "sans";
+type TitleFontMode = "serif" | "kai" | "sans" | "retroSerif";
 type HighlightStyle = "underline" | "marker" | "border";
+type QuoteTreatment = "paper" | "callout" | "code";
+type HighlightTreatment = "softUnderline" | "editorMark" | "botanicalStroke" | "warmSwipe" | "darkGlow" | "swissRule";
 type TextRange = { start: number; end: number };
 
 type PosterMetrics = {
@@ -100,6 +105,20 @@ type ParagraphBlock = {
   raw: string;
 };
 
+type QuoteBoxMetrics = {
+  textInset: number;
+  textWidth: number;
+  paddingTop: number;
+  paddingBottom: number;
+  boxOffsetX: number;
+  boxWidthOffset: number;
+  barOffsetX: number;
+  barTopInset: number;
+  barBottomInset: number;
+  barWidth: number;
+  barRadius: number;
+};
+
 const THEMES: ThemeDefinition[] = [
   {
     id: "moss-paper",
@@ -107,25 +126,26 @@ const THEMES: ThemeDefinition[] = [
     mood: "浅苔纸面与出版物墨感",
     preset: "浅底苔绿纸书",
     description: "浅苔纸面、安静高级，适合默认长期使用",
+    tags: ["复古", "安静"],
     mode: "paper",
     palette: {
       page: "#f3f1ea",
       pageAlt: "#e6ebdf",
       text: "#1f2b22",
       muted: "#667368",
-      accent: "#566f57",
-      accentSoft: "rgba(86, 111, 87, 0.14)",
+      accent: "#3f8f58",
+      accentSoft: "rgba(63, 143, 88, 0.18)",
       border: "rgba(63, 77, 66, 0.12)",
       shadow: "rgba(63, 77, 66, 0.12)",
       glow: "rgba(206, 215, 201, 0.34)"
     },
     surface: {
-      grainAlpha: 0.03,
-      vignetteAlpha: 0.038,
-      washStrength: 0.28,
+      grainAlpha: 0.038,
+      vignetteAlpha: 0.044,
+      washStrength: 0.32,
       innerFrameAlpha: 0.11,
       innerFrameInset: 24,
-      titleAccentMix: 0.62,
+      titleAccentMix: 0.86,
       footerLineAlpha: 0.2,
       footerTextAlpha: 0.9,
       previewShadow: "0 26px 54px rgba(57, 72, 60, 0.11), 0 2px 18px rgba(255,255,255,0.42) inset"
@@ -135,16 +155,67 @@ const THEMES: ThemeDefinition[] = [
       quoteStrokeAlpha: 0.074,
       quoteBarAlpha: 0.72,
       quoteRadius: 22,
-      highlightUnderlineAlpha: 0.48,
-      highlightMarkerAlpha: 0.22,
-      highlightDashAlpha: 0.72
+      quoteTreatment: "paper",
+      highlightTreatment: "softUnderline",
+      highlightUnderlineAlpha: 0.72,
+      highlightMarkerAlpha: 0.32,
+      highlightDashAlpha: 0.84
     },
     editor: {
-      titleSize: 62,
-      bodySize: 31,
-      lineHeight: 1.68,
+      titleSize: 75,
+      bodySize: 30,
+      lineHeight: 1.84,
       titleFontMode: "serif",
       highlightStyle: "underline"
+    }
+  },
+  {
+    id: "warm-editor",
+    name: "暖灰编辑",
+    mood: "清透冷灰与荧光绿效率感",
+    preset: "冷灰效率编辑",
+    description: "冷灰白底、荧光绿高亮、数字网格，适合智性效率长文",
+    tags: ["效率", "数字"],
+    mode: "paper",
+    palette: {
+      page: "#f8f9fa",
+      pageAlt: "#eef2f4",
+      text: "#151d20",
+      muted: "#5f6b70",
+      accent: "#BAF13C",
+      accentSoft: "rgba(186, 241, 60, 0.18)",
+      border: "rgba(19, 30, 34, 0.12)",
+      shadow: "rgba(16, 24, 28, 0.1)",
+      glow: "rgba(186, 241, 60, 0.09)"
+    },
+    surface: {
+      grainAlpha: 0.014,
+      vignetteAlpha: 0.018,
+      washStrength: 0.16,
+      innerFrameAlpha: 0.12,
+      innerFrameInset: 24,
+      titleAccentMix: 0.7,
+      footerLineAlpha: 0.2,
+      footerTextAlpha: 0.9,
+      previewShadow: "0 24px 52px rgba(31, 44, 50, 0.1), 0 1px 0 rgba(255,255,255,0.7) inset"
+    },
+    components: {
+      quoteFillAlpha: 0.042,
+      quoteStrokeAlpha: 0.075,
+      quoteBarAlpha: 1,
+      quoteRadius: 8,
+      quoteTreatment: "callout",
+      highlightTreatment: "editorMark",
+      highlightUnderlineAlpha: 0.68,
+      highlightMarkerAlpha: 0.42,
+      highlightDashAlpha: 0.86
+    },
+    editor: {
+      titleSize: 75,
+      bodySize: 30,
+      lineHeight: 1.84,
+      titleFontMode: "serif",
+      highlightStyle: "marker"
     }
   },
   {
@@ -153,14 +224,15 @@ const THEMES: ThemeDefinition[] = [
     mood: "深林墨绿与收藏级画册气质",
     preset: "深底森林档案",
     description: "深绿画册、暖米字色，适合特别篇与情绪款",
+    tags: ["深绿", "叙事"],
     mode: "archive",
     palette: {
       page: "#18211b",
       pageAlt: "#243128",
       text: "#ebe1cf",
       muted: "#c1b5a1",
-      accent: "#8ea58d",
-      accentSoft: "rgba(142, 165, 141, 0.15)",
+      accent: "#c9e879",
+      accentSoft: "rgba(201, 232, 121, 0.2)",
       border: "rgba(235, 225, 207, 0.12)",
       shadow: "rgba(0, 0, 0, 0.34)",
       glow: "rgba(151, 171, 148, 0.1)"
@@ -171,7 +243,7 @@ const THEMES: ThemeDefinition[] = [
       washStrength: 0.22,
       innerFrameAlpha: 0.14,
       innerFrameInset: 22,
-      titleAccentMix: 0.64,
+      titleAccentMix: 0.9,
       footerLineAlpha: 0.24,
       footerTextAlpha: 0.92,
       previewShadow: "0 30px 62px rgba(0,0,0,0.28), 0 1px 0 rgba(255,255,255,0.04) inset"
@@ -181,14 +253,16 @@ const THEMES: ThemeDefinition[] = [
       quoteStrokeAlpha: 0.12,
       quoteBarAlpha: 0.9,
       quoteRadius: 20,
-      highlightUnderlineAlpha: 0.56,
-      highlightMarkerAlpha: 0.24,
-      highlightDashAlpha: 0.76
+      quoteTreatment: "paper",
+      highlightTreatment: "darkGlow",
+      highlightUnderlineAlpha: 0.76,
+      highlightMarkerAlpha: 0.4,
+      highlightDashAlpha: 0.86
     },
     editor: {
-      titleSize: 64,
-      bodySize: 31,
-      lineHeight: 1.72,
+      titleSize: 75,
+      bodySize: 30,
+      lineHeight: 1.84,
       titleFontMode: "serif",
       highlightStyle: "underline"
     }
@@ -199,14 +273,15 @@ const THEMES: ThemeDefinition[] = [
     mood: "植物纸面与野外手稿感",
     preset: "静谧植物手稿",
     description: "安静青绿、自然纸张、适合复盘随笔",
+    tags: ["自然", "复盘"],
     mode: "sage",
     palette: {
       page: "#f4efe5",
       pageAlt: "#e7dece",
       text: "#1d2a21",
       muted: "#657064",
-      accent: "#476a55",
-      accentSoft: "rgba(71, 106, 85, 0.16)",
+      accent: "#2f9a78",
+      accentSoft: "rgba(47, 154, 120, 0.18)",
       border: "rgba(60, 79, 66, 0.14)",
       shadow: "rgba(76, 88, 78, 0.12)",
       glow: "rgba(199, 210, 194, 0.26)"
@@ -217,7 +292,7 @@ const THEMES: ThemeDefinition[] = [
       washStrength: 0.32,
       innerFrameAlpha: 0.11,
       innerFrameInset: 24,
-      titleAccentMix: 0.64,
+      titleAccentMix: 0.86,
       footerLineAlpha: 0.18,
       footerTextAlpha: 0.88,
       previewShadow: "0 24px 50px rgba(73, 86, 74, 0.12), 0 2px 16px rgba(255,255,255,0.36) inset"
@@ -227,15 +302,17 @@ const THEMES: ThemeDefinition[] = [
       quoteStrokeAlpha: 0.075,
       quoteBarAlpha: 0.7,
       quoteRadius: 22,
-      highlightUnderlineAlpha: 0.42,
-      highlightMarkerAlpha: 0.2,
-      highlightDashAlpha: 0.66
+      quoteTreatment: "paper",
+      highlightTreatment: "botanicalStroke",
+      highlightUnderlineAlpha: 0.7,
+      highlightMarkerAlpha: 0.32,
+      highlightDashAlpha: 0.82
     },
     editor: {
-      titleSize: 60,
+      titleSize: 75,
       bodySize: 30,
-      lineHeight: 1.7,
-      titleFontMode: "sans",
+      lineHeight: 1.84,
+      titleFontMode: "serif",
       highlightStyle: "underline"
     }
   },
@@ -245,14 +322,15 @@ const THEMES: ThemeDefinition[] = [
     mood: "暖沙旧胶片与生活感",
     preset: "暖沙复古胶片",
     description: "暖木暖沙、轻复古、适合情绪和生活内容",
+    tags: ["暖调", "生活"],
     mode: "vintage",
     palette: {
       page: "#f6ede3",
       pageAlt: "#e8d7c8",
       text: "#392c24",
       muted: "#7c6a5e",
-      accent: "#a26948",
-      accentSoft: "rgba(162, 105, 72, 0.17)",
+      accent: "#c65a35",
+      accentSoft: "rgba(198, 90, 53, 0.18)",
       border: "rgba(106, 78, 58, 0.14)",
       shadow: "rgba(89, 65, 50, 0.16)",
       glow: "rgba(220, 188, 164, 0.3)"
@@ -263,7 +341,7 @@ const THEMES: ThemeDefinition[] = [
       washStrength: 0.38,
       innerFrameAlpha: 0.1,
       innerFrameInset: 24,
-      titleAccentMix: 0.6,
+      titleAccentMix: 0.84,
       footerLineAlpha: 0.17,
       footerTextAlpha: 0.9,
       previewShadow: "0 28px 58px rgba(101, 75, 56, 0.14), 0 10px 34px rgba(255,255,255,0.18) inset"
@@ -273,14 +351,16 @@ const THEMES: ThemeDefinition[] = [
       quoteStrokeAlpha: 0.08,
       quoteBarAlpha: 0.74,
       quoteRadius: 24,
-      highlightUnderlineAlpha: 0.48,
-      highlightMarkerAlpha: 0.26,
-      highlightDashAlpha: 0.7
+      quoteTreatment: "paper",
+      highlightTreatment: "warmSwipe",
+      highlightUnderlineAlpha: 0.72,
+      highlightMarkerAlpha: 0.38,
+      highlightDashAlpha: 0.84
     },
     editor: {
-      titleSize: 62,
-      bodySize: 31,
-      lineHeight: 1.72,
+      titleSize: 75,
+      bodySize: 30,
+      lineHeight: 1.84,
       titleFontMode: "serif",
       highlightStyle: "marker"
     }
@@ -291,6 +371,7 @@ const THEMES: ThemeDefinition[] = [
     mood: "暗黑画册与金属油墨",
     preset: "暗黑画册",
     description: "沉静深灰、暖金点缀、适合商业与科技",
+    tags: ["暗黑", "科技"],
     mode: "obsidian",
     palette: {
       page: "#141312",
@@ -319,14 +400,16 @@ const THEMES: ThemeDefinition[] = [
       quoteStrokeAlpha: 0.14,
       quoteBarAlpha: 0.92,
       quoteRadius: 20,
+      quoteTreatment: "paper",
+      highlightTreatment: "darkGlow",
       highlightUnderlineAlpha: 0.56,
       highlightMarkerAlpha: 0.3,
       highlightDashAlpha: 0.8
     },
     editor: {
-      titleSize: 64,
-      bodySize: 31,
-      lineHeight: 1.7,
+      titleSize: 75,
+      bodySize: 30,
+      lineHeight: 1.84,
       titleFontMode: "serif",
       highlightStyle: "underline"
     }
@@ -337,6 +420,7 @@ const THEMES: ThemeDefinition[] = [
     mood: "硬边网格与现代海报感",
     preset: "瑞士现代主义",
     description: "直角几何、强对比、适合结构化表达",
+    tags: ["极简", "结构"],
     mode: "swiss",
     palette: {
       page: "#f8f7f2",
@@ -365,37 +449,46 @@ const THEMES: ThemeDefinition[] = [
       quoteStrokeAlpha: 0.1,
       quoteBarAlpha: 0.94,
       quoteRadius: 14,
+      quoteTreatment: "paper",
+      highlightTreatment: "swissRule",
       highlightUnderlineAlpha: 0.88,
       highlightMarkerAlpha: 0.22,
       highlightDashAlpha: 0.92
     },
     editor: {
-      titleSize: 68,
-      bodySize: 29,
-      lineHeight: 1.58,
-      titleFontMode: "sans",
+      titleSize: 75,
+      bodySize: 30,
+      lineHeight: 1.84,
+      titleFontMode: "serif",
       highlightStyle: "border"
     }
   }
 ];
 
-const DEFAULT_CONTENT = `为什么记录会在 AI 时代重新变得重要
+const DEFAULT_CONTENT = `这套工具适合把已经写好的文字快速排成小红书卡片。你可以从文档、笔记或聊天记录里复制内容，贴进左侧输入框，再做少量删改；右侧会同步预览分页效果，导出时按当前版式生成图片。
 
-以前很多人觉得记录只是为了以后回看，所以它像一种可做可不做的习惯。
+# 支持基础 Markdown 格式
 
-但现在我越来越觉得，记录真正重要的地方，不是存档，而是调用。
+正文用空行分段。**加粗文字** 适合放关键判断、产品名或行动建议，==高亮标记== 用来提醒读者扫一眼就该注意的重点。
 
-### 01 真正变重要的是调用
+> 引用会独立成块，适合放提醒。
 
-你写下来的每一句判断、每一次情绪、每一个细节，在当下看起来都很普通。可只要它被稳定留下来，它就会在未来某个时刻重新回来，帮你组织表达、校准认知、生成新的内容。
+标题可以留空，也可以单独写一句封面标题。字号、行距、页脚和边角都能在面板里调整；内容过长时会自动拆页，引用、重点和小标题会跟着段落走。
 
-AI 不会凭空理解一个人。它只能读取你留下来的材料。所以一个人有没有持续记录，差别会越来越大。
+改完后直接导出图片，适合发布前确认排版，也适合把同一段文字做成一组连续卡片。你只需要关心内容是否准确，剩下的版式交给预览来对齐。`;
 
-> 记录不是文艺爱好，而是一种正在变成基础设施的能力。
+const LEGACY_DEFAULT_CONTENT_PATTERNS = [
+  "为什么记录会在 AI 时代重新变得重要",
+  "01 内容先写顺",
+  "02 样式可以慢慢试",
+  "### 支持基础 Markdown 格式",
+  "小红书卡片工具适合处理已经写好的正文",
+  "主题按钮可以切换苔绿纸书"
+];
 
-这是普通文字，**这是柔和重点**，后面继续普通文字。
-
-==这是更醒目的强调==`;
+function isLegacyDefaultContent(text: string) {
+  return LEGACY_DEFAULT_CONTENT_PATTERNS.some((pattern) => text.includes(pattern));
+}
 
 const PAGE_WIDTH = 720;
 const PAGE_HEIGHT = 960;
@@ -406,19 +499,17 @@ const FOOTER_LINE_LEFT = 108;
 const FOOTER_LINE_RIGHT = 612;
 const FOOTER_LINE_Y = 850;
 const FOOTER_TEXT_Y = 890;
-const TITLE_FONT_FAMILY = "'Source Han Serif SC','Songti SC','STSong','Noto Serif SC',serif";
+const TITLE_FONT_FAMILY = "'Source Han Serif SC Heavy','Source Han Serif SC','Noto Serif CJK SC','Songti SC','STSong',serif";
+const RETRO_SERIF_FONT_FAMILY = "'FZYaSongS-B-GB','FZYaSong-M-GBK','HYDaSongJ','Source Han Serif SC Heavy','Source Han Serif SC','Songti SC','STSong',serif";
 const BODY_FONT_FAMILY = "'PingFang SC','Hiragino Sans GB','Noto Sans SC',sans-serif";
-const TITLE_BREAK_AVOID_START = new Set(Array.from("地的了着吗呢啊呀和与及并而但也又都就才还再把被让给向对将"));
-const TITLE_BREAK_AVOID_END = new Set(Array.from("在把让向对与和及并而但也又都就才还再很太地的了"));
-const NO_LINE_START = new Set(Array.from("，。！？、；：）》」』】〕］〉〗’”%、,.!?;:)]}"));
-const NO_LINE_END = new Set(Array.from("（《「『【〔［〈〖‘“([{"));
+const LEADING_PUNCTUATION = new Set(Array.from("，。！？、；：）》」』】〕］〉〗’”%、,.!?;:)]}"));
 
 const TITLE_FONT_MODES: Record<
   TitleFontMode,
   { label: string; family: string; latinFamily: string }
 > = {
   serif: {
-    label: "知性宋体",
+    label: "高对比宋体",
     family: TITLE_FONT_FAMILY,
     latinFamily: TITLE_FONT_FAMILY
   },
@@ -431,21 +522,29 @@ const TITLE_FONT_MODES: Record<
     label: "现代黑体",
     family: "'DingTalk JinBuTi','PingFang SC','Noto Sans SC',sans-serif",
     latinFamily: "'DingTalk JinBuTi','PingFang SC','Noto Sans SC',sans-serif"
+  },
+  retroSerif: {
+    label: "复古粗宋",
+    family: RETRO_SERIF_FONT_FAMILY,
+    latinFamily: "'Georgia','Times New Roman',serif"
   }
 };
 
 const INITIAL_THEME = THEMES[0];
 
 function getTitleFontWeight(mode: TitleFontMode) {
+  if (mode === "serif") return 500;
+  if (mode === "retroSerif") return 700;
   return mode === "sans" ? 600 : 500;
 }
 
 function getTitleTracking(size: number, mode: TitleFontMode) {
-  const em = mode === "serif" ? 0.038 : mode === "kai" ? 0.026 : 0.018;
+  const em = mode === "retroSerif" ? 0.018 : mode === "serif" ? 0.034 : mode === "kai" ? 0.026 : 0.018;
   return size * em;
 }
 
 function getTitleLineHeightRatio(mode: TitleFontMode) {
+  if (mode === "retroSerif") return 0.96;
   return mode === "serif" ? 1.08 : mode === "kai" ? 1.1 : 1.06;
 }
 
@@ -598,8 +697,17 @@ function getThemeSwatchBackground(theme: ThemeDefinition) {
   }
 }
 
+function getThemeSwatchMark(theme: ThemeDefinition) {
+  if (theme.mode === "swiss") return "Aa";
+  return Array.from(theme.name)[0] ?? "Aa";
+}
+
 function isDarkPosterTheme(theme: ThemeDefinition) {
   return theme.mode === "obsidian" || theme.mode === "archive";
+}
+
+function isDigitalEditorTheme(theme: ThemeDefinition) {
+  return theme.id === "warm-editor";
 }
 
 function resolveTitleFontFamily(mode: TitleFontMode, isLatin: boolean) {
@@ -671,10 +779,14 @@ function getParagraphBlock(text: string): ParagraphBlock {
   return { kind: "body", raw: trimmed };
 }
 
+function splitTextForWrapping(text: string) {
+  return text.match(/[A-Za-z0-9]+(?:[._'’&/+:-][A-Za-z0-9]+)*|[ \t]+|\n|./gu) ?? [];
+}
+
 function explodeInlineTokens(tokens: InlineToken[]) {
   return tokens.flatMap((token) =>
-    Array.from(token.text).map((char) => ({
-      text: char,
+    splitTextForWrapping(token.text).map((unit) => ({
+      text: unit,
       bold: token.bold,
       mark: token.mark
     }))
@@ -700,6 +812,22 @@ function getBodyTokenWidth(token: InlineToken, fontSize: number) {
   return getMeasureContext(font).measureText(token.text).width;
 }
 
+function isLeadingPunctuation(text: string) {
+  return LEADING_PUNCTUATION.has(text);
+}
+
+function isWhitespaceToken(text: string) {
+  return /^[ \t]+$/.test(text);
+}
+
+function splitOversizedWrapUnit(token: InlineToken, fontSize: number, maxWidth: number) {
+  if (token.text.length <= 1 || getBodyTokenWidth(token, fontSize) <= maxWidth) return [token];
+  return Array.from(token.text).map((char) => ({
+    ...token,
+    text: char
+  }));
+}
+
 function wrapInlineTokensByWidth(tokens: InlineToken[], fontSize: number, maxWidth: number) {
   const charTokens = explodeInlineTokens(tokens);
   const lines: InlineLine[] = [];
@@ -714,14 +842,24 @@ function wrapInlineTokensByWidth(tokens: InlineToken[], fontSize: number, maxWid
     }
   };
 
-  for (const token of charTokens) {
+  for (const sourceToken of charTokens) {
+    const splitTokens = splitOversizedWrapUnit(sourceToken, fontSize, maxWidth);
+    for (const token of splitTokens) {
     if (token.text === "\n") {
       pushLine();
       continue;
     }
+    if (currentLine.length === 0 && isWhitespaceToken(token.text)) {
+      continue;
+    }
     const tokenWidth = getBodyTokenWidth(token, fontSize);
     if (currentLine.length > 0 && currentWidth + tokenWidth > maxWidth) {
-      pushLine();
+      if (!isLeadingPunctuation(token.text)) {
+        pushLine();
+        if (isWhitespaceToken(token.text)) {
+          continue;
+        }
+      }
     }
     const lastToken = currentLine[currentLine.length - 1];
     if (lastToken && lastToken.bold === token.bold && lastToken.mark === token.mark) {
@@ -730,23 +868,35 @@ function wrapInlineTokensByWidth(tokens: InlineToken[], fontSize: number, maxWid
       currentLine.push({ ...token });
     }
     currentWidth += tokenWidth;
+    }
   }
   pushLine();
   return lines;
 }
 
+function serializeParagraphBlock(raw: string, kind: ParagraphBlock["kind"]) {
+  const trimmed = raw.trim();
+  if (!trimmed) return "";
+  if (kind === "quote") return `> ${trimmed}`;
+  if (kind === "subheading") return `# ${trimmed}`;
+  return trimmed;
+}
+
 function splitInlineLines(lines: InlineLine[], count: number) {
   const taken = lines.slice(0, count);
   const rest = lines.slice(count);
-  const serializeWithBlockKind = (raw: string, kind: ParagraphBlock["kind"]) => {
-    if (!raw) return "";
-    if (kind === "quote") return `> ${raw}`;
-    if (kind === "subheading") return `### ${raw}`;
-    return raw;
-  };
   return {
-    takenRaw: (kind: ParagraphBlock["kind"]) => serializeWithBlockKind(serializeInlineTokens(taken.flatMap((line) => line.tokens)), kind),
-    restRaw: (kind: ParagraphBlock["kind"]) => serializeWithBlockKind(serializeInlineTokens(rest.flatMap((line) => line.tokens)), kind)
+    takenRaw: (kind: ParagraphBlock["kind"]) => serializeParagraphBlock(serializeInlineTokens(taken.flatMap((line) => line.tokens)), kind),
+    restRaw: (kind: ParagraphBlock["kind"]) => serializeParagraphBlock(serializeInlineTokens(rest.flatMap((line) => line.tokens)), kind)
+  };
+}
+
+function splitParagraphBlockBySentence(block: ParagraphBlock, sourceText: string) {
+  const sourceRaw = block.kind === "body" ? sourceText.trim() : block.raw;
+  return {
+    parts: splitParagraphBySentence(sourceRaw),
+    separator: sourceRaw.includes("\n") ? "\n" : "",
+    serialize: (raw: string) => serializeParagraphBlock(raw, block.kind)
   };
 }
 
@@ -868,41 +1018,6 @@ function drawTitleLine(
   return globalCharIndex - (options?.globalCharStart ?? 0);
 }
 
-function balanceTitleLines(
-  lines: string[],
-  context: CanvasRenderingContext2D,
-  maxWidth: number,
-  mode: TitleFontMode
-) {
-  if (lines.length !== 2) return lines;
-  const merged = lines.join("");
-  let bestSplit = lines;
-  let bestScore = Number.POSITIVE_INFINITY;
-  const sizeMatch = context.font.match(/(\d+)px/);
-  const titleSize = sizeMatch ? Number(sizeMatch[1]) : 62;
-
-  for (let index = 2; index <= merged.length - 2; index += 1) {
-    const first = merged.slice(0, index).trim();
-    const second = merged.slice(index).trim();
-    if (!first || !second) continue;
-    const firstWidth = measureTitleText(first, titleSize, mode);
-    const secondWidth = measureTitleText(second, titleSize, mode);
-    if (firstWidth > maxWidth || secondWidth > maxWidth) continue;
-
-    let score = Math.abs(firstWidth - secondWidth);
-    const lastChar = Array.from(first).at(-1) ?? "";
-    const nextChar = Array.from(second)[0] ?? "";
-    if (TITLE_BREAK_AVOID_END.has(lastChar)) score += 220;
-    if (TITLE_BREAK_AVOID_START.has(nextChar)) score += 220;
-    if (first.length <= 3 || second.length <= 3) score += 160;
-    if (score < bestScore) {
-      bestScore = score;
-      bestSplit = [first, second];
-    }
-  }
-  return bestSplit;
-}
-
 function wrapTitleByWidth(
   text: string,
   context: CanvasRenderingContext2D,
@@ -928,7 +1043,7 @@ function wrapTitleByWidth(
     }
   }
   if (currentLine.trim()) lines.push(currentLine.trim());
-  return balanceTitleLines(lines, context, maxWidth, mode);
+  return lines;
 }
 
 function fitTitleLines(title: string, settings: TypographySettings) {
@@ -964,13 +1079,14 @@ function fitTitleLines(title: string, settings: TypographySettings) {
 function getPosterMetrics(page: PosterPage, settings: TypographySettings): PosterMetrics {
   const bodySize = Math.max(21, settings.bodySize - 4);
   const bodyLineHeight = bodySize * Math.max(1.58, settings.lineHeight - 0.06);
-  const bodyParagraphGap = Math.max(14, bodySize * 0.72);
+  const bodyParagraphGap = Math.max(30, bodySize * 1.25);
   const parsedTitle = page.kind === "cover" && page.title.trim() ? parseTitleMarkup(page.title) : null;
   const titleBlock = parsedTitle ? fitTitleLines(parsedTitle.plainText, settings) : null;
   const titleLineHeightRatio = getTitleLineHeightRatio(settings.titleFontMode);
-  const titleStartY = 176;
-  const separatorY = titleBlock ? titleStartY + titleBlock.titleLines.length * titleBlock.titleLineHeight + 2 : 110;
-  const bodyTopY = separatorY + (titleBlock ? 6 : 10);
+  const bodyAnchorTitleStartY = 196;
+  const titleStartY = 218;
+  const separatorY = titleBlock ? bodyAnchorTitleStartY + titleBlock.titleLines.length * titleBlock.titleLineHeight - 18 : 110;
+  const bodyTopY = separatorY + (titleBlock ? 0 : 10);
   const bodyBottomY = 818;
   return {
     titleSize: titleBlock?.titleSize ?? settings.titleSize,
@@ -996,8 +1112,9 @@ function getGapBetweenBlocks(
   if (!previousBlock) return 0;
   const baseGap = metrics.bodyParagraphGap;
   const quoteGap = baseGap * 1.08 + 4;
+  if (currentBlock.kind === "subheading") return baseGap * 1.38;
+  if (previousBlock.kind === "subheading") return baseGap * 1.18;
   if (previousBlock.kind === "quote" || currentBlock.kind === "quote") return quoteGap;
-  if (previousBlock.kind === "subheading") return baseGap * 0.78;
   return baseGap;
 }
 
@@ -1010,25 +1127,216 @@ function getParagraphMaxLines(
   block: ParagraphBlock,
   availableHeight: number,
   fontSize: number,
-  lineHeight: number
+  lineHeight: number,
+  theme: ThemeDefinition
 ) {
   const activeFontSize = block.kind === "subheading" ? Math.round(fontSize * 1.08) : fontSize;
   const activeLineHeight = block.kind === "subheading" ? lineHeight * 1.02 : lineHeight;
-  const quotePaddingTop = block.kind === "quote" ? Math.max(22, activeFontSize * 0.62) : 0;
-  const quotePaddingBottom = block.kind === "quote" ? quotePaddingTop : 0;
+  const quoteMetrics = block.kind === "quote" ? getQuoteBoxMetrics(theme, activeFontSize, CONTENT_WIDTH) : null;
+  const quotePaddingTop = quoteMetrics?.paddingTop ?? 0;
+  const quotePaddingBottom = quoteMetrics?.paddingBottom ?? 0;
   const textRoom = availableHeight - quotePaddingTop - quotePaddingBottom;
   if (textRoom < activeFontSize) return 0;
   return 1 + Math.floor((textRoom - activeFontSize) / activeLineHeight);
 }
 
-function measureParagraphBlock(block: ParagraphBlock, fontSize: number, lineHeight: number, maxWidth: number) {
+function getQuoteBoxMetrics(theme: ThemeDefinition, fontSize: number, maxWidth: number): QuoteBoxMetrics {
+  const treatment = theme.components.quoteTreatment;
+  if (treatment === "callout") {
+    const padding = Math.max(20, fontSize * 0.58);
+    return {
+      textInset: 42,
+      textWidth: maxWidth - 72,
+      paddingTop: padding,
+      paddingBottom: padding,
+      boxOffsetX: -14,
+      boxWidthOffset: -10,
+      barOffsetX: -8,
+      barTopInset: 12,
+      barBottomInset: 24,
+      barWidth: 5,
+      barRadius: 5
+    };
+  }
+  if (treatment === "code") {
+    const padding = Math.max(18, fontSize * 0.52);
+    return {
+      textInset: 40,
+      textWidth: maxWidth - 68,
+      paddingTop: padding,
+      paddingBottom: padding,
+      boxOffsetX: -12,
+      boxWidthOffset: -12,
+      barOffsetX: -7,
+      barTopInset: 10,
+      barBottomInset: 20,
+      barWidth: 4,
+      barRadius: 4
+    };
+  }
+
+  const padding = Math.max(22, fontSize * 0.62);
+  return {
+    textInset: theme.mode === "swiss" ? 44 : 38,
+    textWidth: maxWidth - 72,
+    paddingTop: padding,
+    paddingBottom: padding,
+    boxOffsetX: -18,
+    boxWidthOffset: -8,
+    barOffsetX: -12,
+    barTopInset: 14,
+    barBottomInset: 28,
+    barWidth: 5,
+    barRadius: 5
+  };
+}
+
+function drawQuoteBlock(
+  context: CanvasRenderingContext2D,
+  theme: ThemeDefinition,
+  x: number,
+  y: number,
+  maxWidth: number,
+  blockHeight: number,
+  metrics: QuoteBoxMetrics
+) {
+  const treatment = theme.components.quoteTreatment;
+  const quoteBaseColor = treatment === "paper" && !isDarkPosterTheme(theme)
+    ? theme.palette.accent
+    : theme.palette.text;
+  const fillAlpha = treatment === "callout"
+    ? Math.max(theme.components.quoteFillAlpha, 0.05)
+    : theme.components.quoteFillAlpha;
+
+  context.save();
+  context.fillStyle = hexToRgba(quoteBaseColor, fillAlpha);
+  roundRectPath(context, x + metrics.boxOffsetX, y, maxWidth + metrics.boxWidthOffset, blockHeight, theme.components.quoteRadius);
+  context.fill();
+  context.strokeStyle = hexToRgba(quoteBaseColor, theme.components.quoteStrokeAlpha);
+  context.lineWidth = treatment === "code" ? 1.2 : 1;
+  context.stroke();
+  context.restore();
+
+  context.save();
+  context.fillStyle = hexToRgba(theme.palette.accent, theme.components.quoteBarAlpha);
+  roundRectPath(
+    context,
+    x + metrics.barOffsetX,
+    y + metrics.barTopInset,
+    metrics.barWidth,
+    Math.max(24, blockHeight - metrics.barBottomInset),
+    metrics.barRadius
+  );
+  context.fill();
+  context.restore();
+}
+
+function resolveHighlightTreatment(theme: ThemeDefinition, highlightStyle: HighlightStyle): HighlightTreatment {
+  if (highlightStyle === theme.editor.highlightStyle) return theme.components.highlightTreatment;
+  if (highlightStyle === "border") return "swissRule";
+  if (highlightStyle === "marker") return isDarkPosterTheme(theme) ? "darkGlow" : "warmSwipe";
+  return theme.mode === "sage" ? "botanicalStroke" : "softUnderline";
+}
+
+function drawHighlightMark(
+  context: CanvasRenderingContext2D,
+  theme: ThemeDefinition,
+  highlightStyle: HighlightStyle,
+  x: number,
+  baselineY: number,
+  tokenWidth: number,
+  fontSize: number
+) {
+  const treatment = resolveHighlightTreatment(theme, highlightStyle);
+  const accent = theme.palette.accent;
+
+  context.save();
+  if (treatment === "editorMark") {
+    context.fillStyle = hexToRgba(accent, Math.max(theme.components.highlightMarkerAlpha, 0.28));
+    roundRectPath(
+      context,
+      x - 5,
+      baselineY - fontSize * 0.6,
+      tokenWidth + 10,
+      Math.max(17, fontSize * 0.52),
+      6
+    );
+    context.fill();
+  } else if (treatment === "warmSwipe") {
+    context.globalCompositeOperation = isDarkPosterTheme(theme) ? "screen" : "multiply";
+    context.fillStyle = hexToRgba(accent, Math.max(theme.components.highlightMarkerAlpha, 0.24));
+    roundRectPath(
+      context,
+      x - 5,
+      baselineY - fontSize * 0.48,
+      tokenWidth + 12,
+      Math.max(15, fontSize * 0.42),
+      8
+    );
+    context.fill();
+  } else if (treatment === "darkGlow") {
+    context.globalCompositeOperation = "screen";
+    context.shadowColor = hexToRgba(accent, 0.34);
+    context.shadowBlur = 10;
+    context.fillStyle = hexToRgba(accent, Math.max(theme.components.highlightMarkerAlpha, 0.2));
+    roundRectPath(
+      context,
+      x - 4,
+      baselineY - fontSize * 0.52,
+      tokenWidth + 8,
+      Math.max(14, fontSize * 0.46),
+      7
+    );
+    context.fill();
+  } else if (treatment === "botanicalStroke") {
+    context.strokeStyle = hexToRgba(accent, Math.max(theme.components.highlightUnderlineAlpha, 0.5));
+    context.lineWidth = Math.max(5, fontSize * 0.16);
+    context.lineCap = "round";
+    context.beginPath();
+    context.moveTo(x - 1, baselineY + fontSize * 0.11);
+    context.bezierCurveTo(
+      x + tokenWidth * 0.24,
+      baselineY + fontSize * 0.2,
+      x + tokenWidth * 0.72,
+      baselineY + fontSize * 0.02,
+      x + tokenWidth + 2,
+      baselineY + fontSize * 0.12
+    );
+    context.stroke();
+  } else if (treatment === "swissRule") {
+    context.strokeStyle = hexToRgba(accent, Math.max(theme.components.highlightDashAlpha, 0.78));
+    context.lineWidth = theme.mode === "swiss" ? 4 : 3.2;
+    context.lineCap = theme.mode === "swiss" ? "butt" : "round";
+    if (highlightStyle === "border" && theme.mode !== "swiss") context.setLineDash([10, 5]);
+    context.beginPath();
+    context.moveTo(x - 1, baselineY + Math.max(5, fontSize * 0.12));
+    context.lineTo(x + tokenWidth + 1, baselineY + Math.max(5, fontSize * 0.12));
+    context.stroke();
+    context.setLineDash([]);
+  } else {
+    context.fillStyle = hexToRgba(accent, Math.max(theme.components.highlightUnderlineAlpha, 0.44));
+    roundRectPath(
+      context,
+      x - 2,
+      baselineY - fontSize * 0.25,
+      tokenWidth + 5,
+      Math.max(8, fontSize * 0.22),
+      4
+    );
+    context.fill();
+  }
+  context.restore();
+}
+
+function measureParagraphBlock(block: ParagraphBlock, fontSize: number, lineHeight: number, maxWidth: number, theme: ThemeDefinition) {
   const activeFontSize = block.kind === "subheading" ? Math.round(fontSize * 1.08) : fontSize;
   const activeLineHeight = block.kind === "subheading" ? lineHeight * 1.02 : lineHeight;
-  const quoteWidth = block.kind === "quote" ? maxWidth - 72 : maxWidth;
+  const quoteMetrics = block.kind === "quote" ? getQuoteBoxMetrics(theme, activeFontSize, maxWidth) : null;
+  const quoteWidth = quoteMetrics?.textWidth ?? maxWidth;
   const lines = wrapInlineTokensByWidth(parseInlineMarkdown(block.raw), activeFontSize, quoteWidth);
   const textHeight = getParagraphVisualHeight(lines.length, activeFontSize, activeLineHeight);
-  const quotePaddingTop = block.kind === "quote" ? Math.max(22, activeFontSize * 0.62) : 0;
-  const quotePaddingBottom = block.kind === "quote" ? quotePaddingTop : 0;
+  const quotePaddingTop = quoteMetrics?.paddingTop ?? 0;
+  const quotePaddingBottom = quoteMetrics?.paddingBottom ?? 0;
   return {
     lines,
     height: block.kind === "quote"
@@ -1050,34 +1358,21 @@ function drawInlineParagraph(
 ) {
   const isQuote = block.kind === "quote";
   const isSubheading = block.kind === "subheading";
-  const quoteInset = isQuote ? (theme.mode === "swiss" ? 44 : 38) : 0;
   const activeFontSize = isSubheading ? Math.round(fontSize * 1.08) : fontSize;
   const activeLineHeight = isSubheading ? lineHeight * 1.02 : lineHeight;
-  const quoteWidth = isQuote ? maxWidth - 72 : maxWidth;
+  const quoteMetrics = isQuote ? getQuoteBoxMetrics(theme, activeFontSize, maxWidth) : null;
+  const quoteInset = quoteMetrics?.textInset ?? 0;
+  const quoteWidth = quoteMetrics?.textWidth ?? maxWidth;
   const lines = wrapInlineTokensByWidth(parseInlineMarkdown(block.raw), activeFontSize, quoteWidth);
   const textHeight = getParagraphVisualHeight(lines.length, activeFontSize, activeLineHeight);
-  const quotePaddingTop = isQuote ? Math.max(22, activeFontSize * 0.62) : 0;
-  const quotePaddingBottom = isQuote ? quotePaddingTop : 0;
+  const quotePaddingTop = quoteMetrics?.paddingTop ?? 0;
+  const quotePaddingBottom = quoteMetrics?.paddingBottom ?? 0;
   const blockHeight = isQuote
     ? quotePaddingTop + textHeight + quotePaddingBottom
     : textHeight;
 
-  if (isQuote) {
-    const quoteBaseColor = isDarkPosterTheme(theme) ? theme.palette.text : theme.palette.accent;
-    context.save();
-    context.fillStyle = hexToRgba(quoteBaseColor, theme.components.quoteFillAlpha);
-    roundRectPath(context, x - 18, y, maxWidth - 8, blockHeight, theme.components.quoteRadius);
-    context.fill();
-    context.strokeStyle = hexToRgba(quoteBaseColor, theme.components.quoteStrokeAlpha);
-    context.lineWidth = 1;
-    context.stroke();
-    context.restore();
-
-    context.save();
-    context.fillStyle = hexToRgba(theme.palette.accent, theme.components.quoteBarAlpha);
-    roundRectPath(context, x - 12, y + 14, 5, Math.max(26, blockHeight - 28), 5);
-    context.fill();
-    context.restore();
+  if (isQuote && quoteMetrics) {
+    drawQuoteBlock(context, theme, x, y, maxWidth, blockHeight, quoteMetrics);
   }
 
   lines.forEach((line, lineIndex) => {
@@ -1090,38 +1385,7 @@ function drawInlineParagraph(
     for (const token of line.tokens) {
       const tokenWidth = getBodyTokenWidth(token, activeFontSize);
       if (token.mark) {
-        context.save();
-        if (highlightStyle === "underline") {
-          context.fillStyle = hexToRgba(theme.palette.accent, theme.components.highlightUnderlineAlpha);
-          roundRectPath(
-            context,
-            cursorX - 2,
-            baselineY - activeFontSize * 0.26,
-            tokenWidth + 4,
-            Math.max(8, activeFontSize * 0.24),
-            4
-          );
-          context.fill();
-        } else if (highlightStyle === "border") {
-          context.strokeStyle = hexToRgba(theme.palette.accent, theme.components.highlightDashAlpha);
-          context.lineWidth = 3.2;
-          context.lineCap = "round";
-          context.setLineDash([10, 5]);
-          context.beginPath();
-          context.moveTo(cursorX - 1, baselineY + Math.max(5, activeFontSize * 0.12));
-          context.lineTo(cursorX + tokenWidth + 1, baselineY + Math.max(5, activeFontSize * 0.12));
-          context.stroke();
-          context.setLineDash([]);
-        } else {
-          context.fillStyle = hexToRgba(theme.palette.accent, theme.components.highlightMarkerAlpha);
-          context.fillRect(
-            cursorX - 2,
-            baselineY - activeFontSize * 0.42,
-            tokenWidth + 4,
-            Math.max(13, activeFontSize * 0.56)
-          );
-        }
-        context.restore();
+        drawHighlightMark(context, theme, highlightStyle, cursorX, baselineY, tokenWidth, activeFontSize);
       }
       context.save();
       const weight = isSubheading ? 600 : token.mark ? 600 : token.bold ? 500 : isQuote ? 400 : 300;
@@ -1137,7 +1401,7 @@ function drawInlineParagraph(
   return lines.length;
 }
 
-function layoutPosterPages(raw: string, manualTitle: string, settings: TypographySettings) {
+function layoutPosterPages(raw: string, manualTitle: string, settings: TypographySettings, theme: ThemeDefinition) {
   const parsed = parseInput(raw);
   const title = manualTitle.trim();
   const renderableTitle = parseTitleMarkup(title).plainText.trim();
@@ -1158,8 +1422,9 @@ function layoutPosterPages(raw: string, manualTitle: string, settings: Typograph
 
   const expandedParagraphs = sourceParagraphs.flatMap((paragraph) => {
     const chunkSize = 180;
-    if (paragraph.length <= chunkSize + 40) return [paragraph];
-    return splitLongParagraph(paragraph, chunkSize);
+    const block = getParagraphBlock(paragraph);
+    if (block.raw.length <= chunkSize + 40) return [paragraph];
+    return splitLongParagraph(block.raw, chunkSize).map((chunk) => serializeParagraphBlock(chunk, block.kind));
   });
 
   const pages: PosterPage[] = [];
@@ -1179,10 +1444,11 @@ function layoutPosterPages(raw: string, manualTitle: string, settings: Typograph
     let previousBlock: ParagraphBlock | null = null;
 
     while (currentParagraph < expandedParagraphs.length || carryParagraph) {
-      const currentText = carryParagraph || expandedParagraphs[currentParagraph];
+      const wasCarryingParagraph = Boolean(carryParagraph);
+      const currentText = wasCarryingParagraph ? carryParagraph : expandedParagraphs[currentParagraph];
       const block = getParagraphBlock(currentText);
       const leadingGap = getGapBetweenBlocks(previousBlock, block, metrics);
-      const { lines, height } = measureParagraphBlock(block, metrics.bodySize, metrics.bodyLineHeight, metrics.bodyWidth);
+      const { lines, height } = measureParagraphBlock(block, metrics.bodySize, metrics.bodyLineHeight, metrics.bodyWidth, theme);
       const blockTop = cursorY + leadingGap;
       const blockBottom = blockTop + height;
 
@@ -1190,30 +1456,36 @@ function layoutPosterPages(raw: string, manualTitle: string, settings: Typograph
         page.paragraphs.push(currentText);
         cursorY = blockBottom;
         previousBlock = block;
-        if (carryParagraph) carryParagraph = "";
-        else currentParagraph += 1;
+        if (wasCarryingParagraph) {
+          carryParagraph = "";
+          currentParagraph += 1;
+        } else {
+          currentParagraph += 1;
+        }
         continue;
       }
 
-      const sentenceParts = splitParagraphBySentence(currentText);
-      if (sentenceParts.length > 1) {
-        let fittedText = "";
+      const sentenceSplit = splitParagraphBlockBySentence(block, currentText);
+      if (sentenceSplit.parts.length > 1) {
+        let fittedRaw = "";
         let fittedCount = 0;
-        for (const sentence of sentenceParts) {
-          const candidate = fittedText ? `${fittedText}${currentText.includes("\n") ? "\n" : ""}${sentence}` : sentence;
+        for (const sentence of sentenceSplit.parts) {
+          const candidateRaw = fittedRaw ? `${fittedRaw}${sentenceSplit.separator}${sentence}` : sentence;
+          const candidate = sentenceSplit.serialize(candidateRaw);
           const candidateBlock = getParagraphBlock(candidate);
-          const { height: candidateHeight } = measureParagraphBlock(candidateBlock, metrics.bodySize, metrics.bodyLineHeight, metrics.bodyWidth);
+          const { height: candidateHeight } = measureParagraphBlock(candidateBlock, metrics.bodySize, metrics.bodyLineHeight, metrics.bodyWidth, theme);
           if (blockTop + candidateHeight <= metrics.bodyBottomY) {
-            fittedText = candidate;
+            fittedRaw = candidateRaw;
             fittedCount += 1;
             continue;
           }
           break;
         }
-        if (fittedText) {
+        if (fittedRaw) {
+          const fittedText = sentenceSplit.serialize(fittedRaw);
           page.paragraphs.push(fittedText);
           previousBlock = getParagraphBlock(fittedText);
-          carryParagraph = sentenceParts.slice(fittedCount).join(currentText.includes("\n") ? "\n" : "").trim();
+          carryParagraph = sentenceSplit.serialize(sentenceSplit.parts.slice(fittedCount).join(sentenceSplit.separator).trim());
           if (!carryParagraph) currentParagraph += 1;
           break;
         }
@@ -1222,7 +1494,7 @@ function layoutPosterPages(raw: string, manualTitle: string, settings: Typograph
       if (page.paragraphs.length > 0) break;
 
       const remainingHeight = metrics.bodyBottomY - blockTop;
-      const maxLines = getParagraphMaxLines(block, remainingHeight, metrics.bodySize, metrics.bodyLineHeight);
+      const maxLines = getParagraphMaxLines(block, remainingHeight, metrics.bodySize, metrics.bodyLineHeight, theme);
       if (maxLines <= 0) break;
       const { takenRaw, restRaw } = splitInlineLines(lines, maxLines);
       const taken = takenRaw(block.kind);
@@ -1243,7 +1515,15 @@ function layoutPosterPages(raw: string, manualTitle: string, settings: Typograph
 function applyNoiseTexture(context: CanvasRenderingContext2D, theme: ThemeDefinition) {
   if (theme.surface.grainAlpha <= 0) return;
   const [r, g, b] = hexToRgb(theme.palette.text);
-  const density = isDarkPosterTheme(theme) ? 2200 : theme.mode === "vintage" ? 1700 : theme.mode === "paper" ? 1900 : 1500;
+  const density = isDigitalEditorTheme(theme)
+    ? 760
+    : isDarkPosterTheme(theme)
+      ? 2200
+      : theme.mode === "vintage"
+        ? 1700
+        : theme.mode === "paper"
+          ? 1900
+          : 1500;
   context.save();
   context.globalCompositeOperation = isDarkPosterTheme(theme) ? "screen" : "multiply";
   for (let index = 0; index < density; index += 1) {
@@ -1254,6 +1534,57 @@ function applyNoiseTexture(context: CanvasRenderingContext2D, theme: ThemeDefini
     context.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
     context.fillRect(x, y, size, size);
   }
+
+  if (!isDigitalEditorTheme(theme) && !isDarkPosterTheme(theme) && theme.mode !== "swiss") {
+    const fiberCount = theme.mode === "paper" ? 72 : 48;
+    context.lineWidth = 0.7;
+    context.lineCap = "round";
+    for (let index = 0; index < fiberCount; index += 1) {
+      const x = Math.random() * PAGE_WIDTH;
+      const y = Math.random() * PAGE_HEIGHT;
+      const length = 18 + Math.random() * 54;
+      const drift = (Math.random() - 0.5) * 2.2;
+      const alpha = theme.surface.grainAlpha * (theme.mode === "paper" ? 0.52 : 0.36);
+      context.strokeStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      context.beginPath();
+      context.moveTo(x, y);
+      context.lineTo(Math.min(PAGE_WIDTH, x + length), y + drift);
+      context.stroke();
+    }
+  }
+  context.restore();
+}
+
+function drawDigitalNotebookGrid(context: CanvasRenderingContext2D, theme: ThemeDefinition) {
+  const gridAlpha = 0.042;
+  const majorAlpha = 0.062;
+  context.save();
+  context.globalAlpha = 1;
+  context.globalCompositeOperation = "multiply";
+  context.lineWidth = 0.7;
+
+  for (let x = 54; x <= PAGE_WIDTH - 54; x += 28) {
+    context.strokeStyle = hexToRgba(theme.palette.text, x % 112 === 54 ? majorAlpha : gridAlpha);
+    context.beginPath();
+    context.moveTo(x, 42);
+    context.lineTo(x, PAGE_HEIGHT - 42);
+    context.stroke();
+  }
+
+  for (let y = 54; y <= PAGE_HEIGHT - 54; y += 28) {
+    context.strokeStyle = hexToRgba(theme.palette.text, y % 112 === 54 ? majorAlpha : gridAlpha);
+    context.beginPath();
+    context.moveTo(42, y);
+    context.lineTo(PAGE_WIDTH - 42, y);
+    context.stroke();
+  }
+
+  context.strokeStyle = hexToRgba(theme.palette.accent, 0.09);
+  context.lineWidth = 1.2;
+  context.beginPath();
+  context.moveTo(CONTENT_LEFT, 92);
+  context.lineTo(CONTENT_RIGHT, 92);
+  context.stroke();
   context.restore();
 }
 
@@ -1289,6 +1620,15 @@ function paintPosterAtmosphere(context: CanvasRenderingContext2D, theme: ThemeDe
   context.arc(616, 172, 154, 0, Math.PI * 2);
   context.fill();
 
+  const titleWash = context.createRadialGradient(278, 258, 18, 278, 258, 310);
+  titleWash.addColorStop(0, isDarkPosterTheme(theme) ? hexToRgba(theme.palette.accent, 0.12) : hexToRgba(theme.palette.accent, theme.mode === "paper" ? 0.09 : 0.065));
+  titleWash.addColorStop(0.55, isDarkPosterTheme(theme) ? hexToRgba(theme.palette.pageAlt, 0.08) : hexToRgba(theme.palette.pageAlt, 0.06));
+  titleWash.addColorStop(1, "rgba(255,255,255,0)");
+  context.fillStyle = titleWash;
+  context.beginPath();
+  context.ellipse(278, 258, 310, 190, -0.08, 0, Math.PI * 2);
+  context.fill();
+
   const bottomWash = context.createRadialGradient(94, 820, 0, 94, 820, 124);
   bottomWash.addColorStop(0, theme.palette.accentSoft);
   bottomWash.addColorStop(1, "rgba(255,255,255,0)");
@@ -1306,7 +1646,11 @@ function paintPosterAtmosphere(context: CanvasRenderingContext2D, theme: ThemeDe
     context.fillRect(0, 0, PAGE_WIDTH, PAGE_HEIGHT);
   }
 
-  if (theme.mode === "paper") {
+  if (isDigitalEditorTheme(theme)) {
+    drawDigitalNotebookGrid(context, theme);
+  }
+
+  if (theme.mode === "paper" && !isDigitalEditorTheme(theme)) {
     const paperBloom = context.createLinearGradient(0, 0, PAGE_WIDTH, PAGE_HEIGHT);
     paperBloom.addColorStop(0, hexToRgba(theme.palette.pageAlt, 0.08));
     paperBloom.addColorStop(0.35, "rgba(255,255,255,0)");
@@ -1370,7 +1714,7 @@ function drawCoverOrnament(
   theme: ThemeDefinition,
   metrics: PosterMetrics
 ) {
-  if (theme.mode === "swiss") return;
+  if (theme.mode === "swiss" || isDigitalEditorTheme(theme)) return;
   context.save();
   context.fillStyle = isDarkPosterTheme(theme)
     ? hexToRgba(theme.palette.text, 0.08)
@@ -1440,10 +1784,9 @@ async function renderPosterToDataUrl(
   context.restore();
 
   if (page.kind === "cover" && page.title.trim()) {
-    const titleLineWidths = metrics.titleLines.map((line) => measureTitleText(line, metrics.titleSize, settings.titleFontMode));
     const accentRanges = metrics.titleAccentRanges;
     const titleAccentColor = mixHexColors(theme.palette.text, theme.palette.accent, theme.surface.titleAccentMix);
-    const titleAccentWeight = settings.titleFontMode === "sans" ? 700 : 600;
+    const titleAccentWeight = settings.titleFontMode === "serif" ? 600 : settings.titleFontMode === "retroSerif" || settings.titleFontMode === "sans" ? 700 : 600;
 
     drawCoverOrnament(context, theme, metrics);
 
@@ -1462,13 +1805,10 @@ async function renderPosterToDataUrl(
     }
     let titleCharOffset = 0;
     metrics.titleLines.forEach((line, lineIndex) => {
-      const lineX = lineIndex === 1 && metrics.titleLines.length > 1
-        ? CONTENT_LEFT + Math.max(16, Math.min(34, (titleLineWidths[0] - titleLineWidths[lineIndex]) * 0.22 + 12))
-        : CONTENT_LEFT;
       titleCharOffset += drawTitleLine(
         context,
         line,
-        lineX,
+        CONTENT_LEFT,
         metrics.titleStartY + lineIndex * metrics.titleLineHeight,
         metrics.titleSize,
         settings.titleFontMode,
@@ -1489,7 +1829,7 @@ async function renderPosterToDataUrl(
   page.paragraphs.forEach((paragraph) => {
     const block = getParagraphBlock(paragraph);
     paragraphY += getGapBetweenBlocks(previousBlock, block, metrics);
-    const { height } = measureParagraphBlock(block, metrics.bodySize, metrics.bodyLineHeight, metrics.bodyWidth);
+    const { height } = measureParagraphBlock(block, metrics.bodySize, metrics.bodyLineHeight, metrics.bodyWidth, theme);
     const blockBottom = paragraphY + height;
     if (blockBottom > metrics.bodyBottomY) return;
     drawInlineParagraph(
@@ -1584,9 +1924,17 @@ export default function HomePage() {
     setHighlightStyle(targetTheme.editor.highlightStyle);
   }
 
+  function selectThemePreset(targetTheme: ThemeDefinition) {
+    setThemeId(targetTheme.id);
+  }
+
   useEffect(() => {
-    setPages(layoutPosterPages(deferredContent, manualTitle, typographySettings));
-  }, [deferredContent, manualTitle, typographySettings]);
+    setContent((current) => (isLegacyDefaultContent(current) ? DEFAULT_CONTENT : current));
+  }, []);
+
+  useEffect(() => {
+    setPages(layoutPosterPages(deferredContent, manualTitle, typographySettings, theme));
+  }, [deferredContent, manualTitle, typographySettings, theme]);
 
   useEffect(() => {
     let cancelled = false;
@@ -1667,7 +2015,7 @@ export default function HomePage() {
           </div>
           <div className="control-panel-scroll">
             {sidebarTab === "content" ? (
-              <>
+              <div className="content-form-stack">
                 <div className="panel-section">
                   <div className="section-head">
                     <label htmlFor="title-input">自定义标题</label>
@@ -1689,15 +2037,15 @@ export default function HomePage() {
                   </div>
                   <textarea
                     id="content-input"
-                    className="text-area"
+                    className="text-area text-area--content"
                     value={content}
                     onChange={(event) => setContent(event.target.value)}
                     placeholder="直接贴正文内容，空行分段。"
                   />
                 </div>
-              </>
+              </div>
             ) : (
-              <>
+              <div className="style-form-stack">
                 <details className="accordion-section" open>
                   <summary className="accordion-summary">排版风格预设</summary>
                   <div className="section-head section-head--inside">
@@ -1712,26 +2060,34 @@ export default function HomePage() {
                           key={item.id}
                           type="button"
                           className={`theme-card${isActive ? " active" : ""}`}
-                          onClick={() => setThemeId(item.id)}
+                          onClick={() => selectThemePreset(item)}
+                          title={`${item.name}：${item.description}`}
                           style={isActive ? { borderColor: item.palette.accent, boxShadow: `0 16px 32px ${hexToRgba(item.palette.accent, 0.14)}` } : undefined}
                         >
                           <span
                             className="theme-swatch"
+                            aria-hidden="true"
                             style={{
                               background: getThemeSwatchBackground(item),
                               boxShadow: `inset 0 0 0 1px ${item.palette.border}`
                             }}
                           >
-                            <span className="theme-swatch-preset" style={{ color: item.mode === "obsidian" || item.mode === "archive" ? hexToRgba(item.palette.text, 0.82) : item.palette.muted }}>
-                              {item.preset}
+                            <span className="theme-swatch-mark" style={{ color: item.palette.text }}>
+                              {getThemeSwatchMark(item)}
                             </span>
-                            <span className="theme-swatch-name" style={{ color: item.palette.text }}>
-                              {item.name}
+                            <span className="theme-swatch-lines" aria-hidden="true">
+                              <span style={{ backgroundColor: hexToRgba(item.palette.text, 0.36) }} />
+                              <span style={{ backgroundColor: hexToRgba(item.palette.text, 0.24) }} />
+                              <span style={{ backgroundColor: hexToRgba(item.palette.text, 0.18) }} />
                             </span>
                           </span>
                           <span className="theme-card-copy">
                             <strong>{item.name}</strong>
-                            <span>{item.description}</span>
+                            <span className="theme-card-tags">
+                              {item.tags.map((tag) => (
+                                <span key={tag} className="theme-card-tag">{tag}</span>
+                              ))}
+                            </span>
                           </span>
                           <span className="theme-card-check" style={{ background: item.palette.accent }} aria-hidden="true">{isActive ? "✓" : ""}</span>
                         </button>
@@ -1743,14 +2099,13 @@ export default function HomePage() {
                 <details className="accordion-section" open>
                   <summary className="accordion-summary">排版微调</summary>
                   <div className="accordion-tools">
-                    <span className="section-meta">恢复当前预设的推荐排版</span>
                     <button
                       type="button"
                       className="inline-reset-button"
                       onClick={() => applyThemeEditorDefaults()}
                       disabled={!isTypographyDirty}
                     >
-                      恢复默认
+                      恢复预设值
                     </button>
                   </div>
                   <div className="control-stack">
@@ -1797,9 +2152,9 @@ export default function HomePage() {
                       </div>
                       <input id="line-height-range" className="range-input" type="range" min={1.4} max={2} step={0.02} value={lineHeight} onChange={(event) => setLineHeight(Number(event.target.value))} />
                       <div className="preset-row">
-                        <button type="button" className={`preset-chip${lineHeight <= 1.56 ? " active" : ""}`} onClick={() => setLineHeight(1.52)}>紧凑</button>
-                        <button type="button" className={`preset-chip${lineHeight > 1.56 && lineHeight < 1.76 ? " active" : ""}`} onClick={() => setLineHeight(1.68)}>适中</button>
-                        <button type="button" className={`preset-chip${lineHeight >= 1.76 ? " active" : ""}`} onClick={() => setLineHeight(1.84)}>宽松</button>
+                        <button type="button" className={`preset-chip${lineHeight < 1.76 ? " active" : ""}`} onClick={() => setLineHeight(1.68)}>紧凑</button>
+                        <button type="button" className={`preset-chip${lineHeight >= 1.76 && lineHeight < 1.94 ? " active" : ""}`} onClick={() => setLineHeight(1.84)}>适中</button>
+                        <button type="button" className={`preset-chip${lineHeight >= 1.94 ? " active" : ""}`} onClick={() => setLineHeight(2)}>宽松</button>
                       </div>
                     </div>
                   </div>
@@ -1839,7 +2194,7 @@ export default function HomePage() {
                     </div>
                   </div>
                 </details>
-              </>
+              </div>
             )}
           </div>
         </aside>
@@ -1847,28 +2202,39 @@ export default function HomePage() {
         <section className="preview-panel">
           <div className="preview-head">
             <div className="preview-head-main">
-              <h2>实时预览</h2>
-              <div className="theme-quickbar">
-                {THEMES.map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    className={`theme-dot${item.id === themeId ? " active" : ""}`}
-                    style={{
-                      background: getThemeSwatchBackground(item),
-                      borderColor: item.id === themeId ? item.palette.accent : undefined,
-                      boxShadow: item.id === themeId
-                        ? `0 0 0 4px ${hexToRgba(item.palette.accent, 0.16)}`
-                        : "0 4px 10px rgba(78, 90, 99, 0.08)"
-                    }}
-                    onClick={() => setThemeId(item.id)}
-                    aria-label={`切换到${item.name}`}
-                    title={item.name}
-                  />
-                ))}
+              <div className="preview-title-row">
+                <h2>实时预览</h2>
+                <div className="theme-quickbar" aria-label="配色快捷切换">
+                  {THEMES.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      className={`theme-dot${item.id === themeId ? " active" : ""}`}
+                      style={{
+                        background: getThemeSwatchBackground(item),
+                        borderColor: item.id === themeId ? item.palette.accent : undefined,
+                        boxShadow: item.id === themeId
+                          ? `0 0 0 3px ${hexToRgba(item.palette.accent, 0.14)}`
+                          : "0 3px 8px rgba(78, 90, 99, 0.08)"
+                      }}
+                      onClick={() => selectThemePreset(item)}
+                      aria-label={`切换到${item.name}`}
+                      title={item.name}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
-            <p className="preview-note">所见即所得 · 导出为 3:4 双倍高清图片</p>
+            <div className="preview-head-actions">
+              <span className="preview-note">所见即所得，3:4 双倍高清 PNG</span>
+              <span className="export-help">
+                <button type="button" className="info-button" aria-label="查看导出说明">i</button>
+                <span className="export-tooltip" role="tooltip">{pages.length} 张卡片将按当前主题批量下载。也可以右键单击单张预览图片保存。</span>
+              </span>
+              <button className="primary-button preview-primary-button" onClick={() => void handleExportAll()} disabled={isExporting}>
+                {isExporting ? "导出中..." : "生成并下载"}
+              </button>
+            </div>
           </div>
 
           <div className="poster-grid">
@@ -1877,7 +2243,7 @@ export default function HomePage() {
                 <div
                   className="poster-preview-stage"
                   style={{
-                    borderRadius: cardCornerMode === "rounded" ? 30 : 0,
+                    borderRadius: cardCornerMode === "rounded" ? 12 : 0,
                     boxShadow: theme.surface.previewShadow,
                     borderColor: theme.palette.border,
                     background: theme.palette.pageAlt
@@ -1897,15 +2263,6 @@ export default function HomePage() {
             ))}
           </div>
 
-          <div className="preview-action-bar">
-            <div>
-              <span className="preview-action-kicker">准备好了就直接导出</span>
-              <strong>{pages.length} 张卡片将按当前主题批量下载，或右键单击单张图片保存</strong>
-            </div>
-            <button className="primary-button preview-primary-button" onClick={() => void handleExportAll()} disabled={isExporting}>
-              {isExporting ? "导出中..." : "生成并下载"}
-            </button>
-          </div>
         </section>
       </section>
     </main>

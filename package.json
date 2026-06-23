@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "test": "node scripts/check-default-content.mjs",
     "build": "next build",
     "start": "next start"
   },
