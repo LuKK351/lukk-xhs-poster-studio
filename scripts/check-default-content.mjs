@@ -76,8 +76,8 @@ assert.match(pageSource, /function resolveHighlightTreatment/, "highlight treatm
 assert.match(pageSource, /function drawHighlightMark/, "highlight rendering should be extracted from paragraph drawing");
 assert.match(pageSource, /id:\s*"moss-paper"[\s\S]*?accent:\s*"#3f8f58"[\s\S]*?titleAccentMix:\s*0\.86[\s\S]*?highlightUnderlineAlpha:\s*0\.72/, "moss-paper emphasis should stay visible in small previews");
 assert.match(pageSource, /id:\s*"forest-archive"[\s\S]*?accent:\s*"#c9e879"[\s\S]*?titleAccentMix:\s*0\.9[\s\S]*?highlightMarkerAlpha:\s*0\.4/, "forest archive emphasis should stay visible on dark backgrounds");
-assert.match(pageSource, /id:\s*"sage-dawn"[\s\S]*?accent:\s*"#2f9a78"[\s\S]*?titleAccentMix:\s*0\.86[\s\S]*?highlightUnderlineAlpha:\s*0\.7/, "sage dawn emphasis should separate from moss-paper");
-assert.match(pageSource, /id:\s*"peach-cloud"[\s\S]*?accent:\s*"#c65a35"[\s\S]*?titleAccentMix:\s*0\.84[\s\S]*?highlightMarkerAlpha:\s*0\.38/, "peach cloud emphasis should use a clearer terracotta accent");
+assert.match(pageSource, /id:\s*"sage-dawn"[\s\S]*?page:\s*"#eef3ee"[\s\S]*?pageAlt:\s*"#dee7df"[\s\S]*?accent:\s*"#2e5f49"[\s\S]*?titleAccentMix:\s*0\.86[\s\S]*?highlightUnderlineAlpha:\s*0\.7/, "sage dawn should read as a cooler mist-green natural theme");
+assert.match(pageSource, /id:\s*"peach-cloud"[\s\S]*?page:\s*"#f8eadf"[\s\S]*?pageAlt:\s*"#f3d6c7"[\s\S]*?accent:\s*"#c95b32"[\s\S]*?titleAccentMix:\s*0\.84[\s\S]*?highlightMarkerAlpha:\s*0\.38/, "peach cloud should read as a warmer peach-apricot life theme");
 assert.match(pageSource, /label:\s*"复古粗宋"/, "retro serif style should be available in the title style picker");
 assert.doesNotMatch(pageSource, /墨迹大字|INK_TITLE_OFFSETS|titleFontMode:\s*"ink"/, "ink handwriting title style should be removed");
 assert.match(pageSource, /if \(mode === "serif"\) return 500;/, "default serif title should use a lighter editorial weight");
@@ -125,11 +125,14 @@ assert.match(pageSource, /className="export-tooltip"/, "download explanation sho
 assert.doesNotMatch(pageSource, /preview-action-bar|preview-action-kicker/, "bottom export action bar should be removed");
 assert.match(pageSource, /borderRadius: cardCornerMode === "rounded" \? 12 : 0/, "preview card radius should use the medium radius level");
 assert.match(cssSource, /\.hero-card,[\s\S]*?border-radius: 20px;/, "large surfaces should use tighter 20px radius");
-assert.match(cssSource, /\.primary-button \{[\s\S]*?border-radius: 12px;/, "primary buttons should use 12px radius instead of pill corners");
+assert.match(cssSource, /--accent:\s*#24211d;/, "outer UI accent should use warm charcoal instead of SaaS blue");
+assert.match(cssSource, /--surface-shadow:\s*rgba\(36, 32, 28, 0\.08\);/, "outer UI shadows should use warm charcoal instead of cold blue-gray");
+assert.match(cssSource, /\.hero-copy h1 \{[\s\S]*?font-family: "Source Han Serif SC", "Songti SC", "STSong", serif;[\s\S]*?letter-spacing: 0\.026em;/, "top product headline should carry the same editorial serif taste as the cards");
+assert.match(cssSource, /\.primary-button \{[\s\S]*?border-radius: 12px;[\s\S]*?background: linear-gradient\(135deg, #181612, #2f2a24\);/, "primary buttons should use warm charcoal with 12px radius");
 assert.match(cssSource, /\.panel-tabs \{[\s\S]*?border-radius: 12px;/, "tab switcher should use 12px radius");
 assert.match(cssSource, /\.workspace-grid \{[\s\S]*?align-items: stretch;/, "main columns should stretch together");
 assert.match(cssSource, /\.text-input,[\s\S]*?border: 1px solid #e4e4e7;[\s\S]*?background: #fff;/, "inputs should use a clean white surface with a subtle border");
-assert.match(cssSource, /\.text-input:focus,[\s\S]*?border-color: #a1a1aa;[\s\S]*?box-shadow: 0 0 0 2px rgba\(63, 107, 152, 0\.08\);/, "inputs should have a clear but restrained focus state");
+assert.match(cssSource, /\.text-input:focus,[\s\S]*?border-color: #a8a09a;[\s\S]*?box-shadow: 0 0 0 2px rgba\(36, 32, 28, 0\.08\);/, "inputs should have a warm, restrained focus state");
 assert.match(cssSource, /\.content-form-stack \{[\s\S]*?flex-direction: column;/, "content editor should have a stretching form stack");
 assert.match(cssSource, /\.text-area--content \{[\s\S]*?flex: 1;/, "body textarea should fill available sidebar space");
 assert.match(cssSource, /\.panel-section \+ \.panel-section \{[\s\S]*?margin-top: 32px;/, "title and body input groups should have clearer separation");

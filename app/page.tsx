@@ -325,15 +325,15 @@ const THEMES: ThemeDefinition[] = [
     tags: ["自然", "复盘"],
     mode: "sage",
     palette: {
-      page: "#f4efe5",
-      pageAlt: "#e7dece",
-      text: "#1d2a21",
-      muted: "#657064",
-      accent: "#2f9a78",
-      accentSoft: "rgba(47, 154, 120, 0.18)",
-      border: "rgba(60, 79, 66, 0.14)",
-      shadow: "rgba(76, 88, 78, 0.12)",
-      glow: "rgba(199, 210, 194, 0.26)"
+      page: "#eef3ee",
+      pageAlt: "#dee7df",
+      text: "#1a2a22",
+      muted: "#5c6d63",
+      accent: "#2e5f49",
+      accentSoft: "rgba(46, 95, 73, 0.18)",
+      border: "rgba(46, 70, 58, 0.14)",
+      shadow: "rgba(50, 72, 60, 0.12)",
+      glow: "rgba(204, 221, 211, 0.28)"
     },
     surface: {
       grainAlpha: 0.044,
@@ -344,7 +344,7 @@ const THEMES: ThemeDefinition[] = [
       titleAccentMix: 0.86,
       footerLineAlpha: 0.18,
       footerTextAlpha: 0.88,
-      previewShadow: "0 24px 50px rgba(73, 86, 74, 0.12), 0 2px 16px rgba(255,255,255,0.36) inset"
+      previewShadow: "0 24px 50px rgba(50, 72, 60, 0.12), 0 2px 16px rgba(255,255,255,0.4) inset"
     },
     components: {
       quoteFillAlpha: 0.048,
@@ -374,15 +374,15 @@ const THEMES: ThemeDefinition[] = [
     tags: ["暖调", "生活"],
     mode: "vintage",
     palette: {
-      page: "#f6ede3",
-      pageAlt: "#e8d7c8",
-      text: "#392c24",
-      muted: "#7c6a5e",
-      accent: "#c65a35",
-      accentSoft: "rgba(198, 90, 53, 0.18)",
-      border: "rgba(106, 78, 58, 0.14)",
-      shadow: "rgba(89, 65, 50, 0.16)",
-      glow: "rgba(220, 188, 164, 0.3)"
+      page: "#f8eadf",
+      pageAlt: "#f3d6c7",
+      text: "#3b261f",
+      muted: "#806256",
+      accent: "#c95b32",
+      accentSoft: "rgba(201, 91, 50, 0.2)",
+      border: "rgba(126, 76, 54, 0.14)",
+      shadow: "rgba(110, 64, 44, 0.16)",
+      glow: "rgba(236, 174, 146, 0.32)"
     },
     surface: {
       grainAlpha: 0.04,
@@ -393,7 +393,7 @@ const THEMES: ThemeDefinition[] = [
       titleAccentMix: 0.84,
       footerLineAlpha: 0.17,
       footerTextAlpha: 0.9,
-      previewShadow: "0 28px 58px rgba(101, 75, 56, 0.14), 0 10px 34px rgba(255,255,255,0.18) inset"
+      previewShadow: "0 28px 58px rgba(110, 64, 44, 0.14), 0 10px 34px rgba(255,255,255,0.2) inset"
     },
     components: {
       quoteFillAlpha: 0.06,
