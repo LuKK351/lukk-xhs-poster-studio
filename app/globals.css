@@ -136,7 +136,7 @@ button:disabled {
   top: 14px;
   display: flex;
   flex-direction: column;
-  max-height: calc(100vh - 28px);
+  max-height: calc(100vh - 72px);
   padding: 18px 16px 16px;
   overflow: hidden;
 }
@@ -292,8 +292,21 @@ button:disabled {
   font-size: 15px;
 }
 
+.text-area::-webkit-scrollbar {
+  width: 5px;
+}
+
+.text-area::-webkit-scrollbar-thumb {
+  border-radius: 3px;
+  background: #e4e4e7;
+}
+
+.text-area::-webkit-scrollbar-thumb:hover {
+  background: #d4d4d8;
+}
+
 .text-area--content {
-  min-height: clamp(620px, 68vh, 820px);
+  min-height: clamp(520px, 58vh, 720px);
   flex: 1;
 }
 
@@ -635,6 +648,12 @@ button:disabled {
   font-size: 12px;
   font-weight: 800;
   line-height: 1;
+}
+
+.info-icon {
+  display: block;
+  width: 14px;
+  height: 14px;
 }
 
 .export-tooltip {

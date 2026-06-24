@@ -66,7 +66,7 @@ type TypographySettings = {
   titleFontMode: TitleFontMode;
 };
 
-type FooterRightMode = "auto" | "blank" | "page" | "date";
+type FooterRightMode = "blank" | "page" | "date";
 type CardCornerMode = "rounded" | "square";
 type SidebarTab = "content" | "style";
 type TitleFontMode = "serif" | "kai" | "sans" | "retroSerif";
@@ -551,6 +551,7 @@ const FOOTER_TEXT_Y = 890;
 const TITLE_FONT_FAMILY = "'Source Han Serif SC Heavy','Source Han Serif SC','Noto Serif CJK SC','Songti SC','STSong',serif";
 const RETRO_SERIF_FONT_FAMILY = "'FZYaSongS-B-GB','FZYaSong-M-GBK','HYDaSongJ','Source Han Serif SC Heavy','Source Han Serif SC','Songti SC','STSong',serif";
 const BODY_FONT_FAMILY = "'PingFang SC','Hiragino Sans GB','Noto Sans SC',sans-serif";
+const FOOTER_FONT_FAMILY = "'SF Mono','JetBrains Mono','Courier New','PingFang SC','Noto Sans SC',monospace";
 const LEADING_PUNCTUATION = new Set(Array.from("，。！？、；：）》」』】〕］〉〗’”%、,.!?;:)]}"));
 
 const TITLE_FONT_MODES: Record<
@@ -580,6 +581,19 @@ const TITLE_FONT_MODES: Record<
 };
 
 const INITIAL_THEME = THEMES[0];
+const THEME_PRESET_ORDER = [
+  "moss-paper",
+  "warm-editor",
+  "peach-cloud",
+  "lemon-note",
+  "sage-dawn",
+  "swiss-modern",
+  "forest-archive",
+  "deep-obsidian"
+];
+const THEME_PRESETS = THEME_PRESET_ORDER
+  .map((themeId) => THEMES.find((theme) => theme.id === themeId))
+  .filter((theme): theme is ThemeDefinition => Boolean(theme));
 
 function getTitleFontWeight(mode: TitleFontMode) {
   if (mode === "serif") return 500;
@@ -1777,6 +1791,46 @@ function drawCoverOrnament(
   context.restore();
 }
 
+function getFooterRightText(mode: FooterRightMode, index: number, totalPages: number) {
+  if (mode === "page") return `${String(index + 1).padStart(2, "0")}/${totalPages}`;
+  if (mode === "date") return getBeijingDateLabel();
+  return "";
+}
+
+function drawPosterFooter(
+  context: CanvasRenderingContext2D,
+  theme: ThemeDefinition,
+  index: number,
+  totalPages: number,
+  footerLeft: string,
+  footerRightMode: FooterRightMode
+) {
+  const leftText = footerLeft.trim();
+  const rightText = getFooterRightText(footerRightMode, index, totalPages);
+  const footerTextAlpha = Math.max(0.52, theme.surface.footerTextAlpha * 0.74);
+
+  context.strokeStyle = hexToRgba(theme.palette.text, theme.surface.footerLineAlpha * 0.72);
+  context.lineWidth = 1;
+  context.beginPath();
+  context.moveTo(FOOTER_LINE_LEFT, FOOTER_LINE_Y);
+  context.lineTo(FOOTER_LINE_RIGHT, FOOTER_LINE_Y);
+  context.stroke();
+
+  context.fillStyle = hexToRgba(theme.palette.text, footerTextAlpha);
+  context.font = `500 13px ${FOOTER_FONT_FAMILY}`;
+  context.textBaseline = "alphabetic";
+  if (leftText) context.fillText(leftText, CONTENT_LEFT, FOOTER_TEXT_Y);
+
+  if (rightText) {
+    context.save();
+    context.textAlign = "right";
+    context.font = `500 13px ${FOOTER_FONT_FAMILY}`;
+    context.fillStyle = hexToRgba(theme.palette.text, footerTextAlpha);
+    context.fillText(rightText, CONTENT_RIGHT, FOOTER_TEXT_Y);
+    context.restore();
+  }
+}
+
 async function renderPosterToDataUrl(
   page: PosterPage,
   theme: ThemeDefinition,
@@ -1786,6 +1840,7 @@ async function renderPosterToDataUrl(
   totalPages: number,
   footerLeft: string,
   footerRightMode: FooterRightMode,
+  footerEnabled: boolean,
   cardCornerMode: CardCornerMode
 ) {
   const canvas = document.createElement("canvas");
@@ -1896,31 +1951,7 @@ async function renderPosterToDataUrl(
     previousBlock = block;
   });
 
-  context.strokeStyle = hexToRgba(theme.palette.text, theme.surface.footerLineAlpha);
-  context.lineWidth = 1;
-  context.beginPath();
-  context.moveTo(FOOTER_LINE_LEFT, FOOTER_LINE_Y);
-  context.lineTo(FOOTER_LINE_RIGHT, FOOTER_LINE_Y);
-  context.stroke();
-
-  context.fillStyle = hexToRgba(theme.palette.text, theme.surface.footerTextAlpha);
-  context.font = `600 14px ${BODY_FONT_FAMILY}`;
-  context.fillText(footerLeft.trim() || "困困", CONTENT_LEFT, FOOTER_TEXT_Y);
-
-  let rightText = "";
-  if (footerRightMode === "page") rightText = `${String(index + 1).padStart(2, "0")}/${totalPages}`;
-  else if (footerRightMode === "date") rightText = getBeijingDateLabel();
-  else if (footerRightMode === "auto" && totalPages > 1) rightText = `${String(index + 1).padStart(2, "0")}/${totalPages}`;
-
-  if (rightText) {
-    context.save();
-    context.textAlign = "right";
-    context.font = theme.mode === "paper" || theme.mode === "archive"
-      ? `600 18px Georgia, 'Times New Roman', serif`
-      : `600 14px ${BODY_FONT_FAMILY}`;
-    context.fillText(rightText, CONTENT_RIGHT, FOOTER_TEXT_Y);
-    context.restore();
-  }
+  if (footerEnabled) drawPosterFooter(context, theme, index, totalPages, footerLeft, footerRightMode);
 
   return canvas.toDataURL("image/png");
 }
@@ -1944,8 +1975,9 @@ export default function HomePage() {
   const [lineHeight, setLineHeight] = useState(INITIAL_THEME.editor.lineHeight);
   const [titleFontMode, setTitleFontMode] = useState<TitleFontMode>(INITIAL_THEME.editor.titleFontMode);
   const [highlightStyle, setHighlightStyle] = useState<HighlightStyle>(INITIAL_THEME.editor.highlightStyle);
+  const [footerEnabled, setFooterEnabled] = useState(true);
   const [footerLeft, setFooterLeft] = useState("困困");
-  const [footerRightMode, setFooterRightMode] = useState<FooterRightMode>("auto");
+  const [footerRightMode, setFooterRightMode] = useState<FooterRightMode>("page");
   const [cardCornerMode, setCardCornerMode] = useState<CardCornerMode>("square");
   const [pages, setPages] = useState<PosterPage[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
@@ -2003,6 +2035,7 @@ export default function HomePage() {
           pages.length,
           footerLeft,
           footerRightMode,
+          footerEnabled,
           cardCornerMode
         );
         urls.push(dataUrl);
@@ -2013,7 +2046,7 @@ export default function HomePage() {
     return () => {
       cancelled = true;
     };
-  }, [pages, theme, typographySettings, highlightStyle, footerLeft, footerRightMode, cardCornerMode]);
+  }, [pages, theme, typographySettings, highlightStyle, footerLeft, footerRightMode, footerEnabled, cardCornerMode]);
 
   async function handleExportAll() {
     startExportTransition(async () => {
@@ -2027,6 +2060,7 @@ export default function HomePage() {
           pages.length,
           footerLeft,
           footerRightMode,
+          footerEnabled,
           cardCornerMode
         );
         downloadDataUrl(dataUrl, `xhs-poster-${index + 1}.png`);
@@ -2102,7 +2136,7 @@ export default function HomePage() {
                     <span className="section-meta">{theme.preset}</span>
                   </div>
                   <div className="theme-list">
-                    {THEMES.map((item) => {
+                    {THEME_PRESETS.map((item) => {
                       const isActive = item.id === themeId;
                       return (
                         <button
@@ -2214,20 +2248,29 @@ export default function HomePage() {
                   <div className="control-stack">
                     <div className="control-item">
                       <div className="section-head section-head--compact">
-                        <label htmlFor="footer-left-input">左下角内容</label>
-                        <span className="section-meta">默认困困</span>
+                        <label htmlFor="footer-enabled-mode">页脚显示</label>
+                        <span className="section-meta">含横线与角标</span>
                       </div>
-                      <input id="footer-left-input" className="text-input" value={footerLeft} onChange={(event) => setFooterLeft(event.target.value)} placeholder="困困" />
+                      <select id="footer-enabled-mode" className="select-input" value={footerEnabled ? "on" : "off"} onChange={(event) => setFooterEnabled(event.target.value === "on")}>
+                        <option value="on">显示页脚</option>
+                        <option value="off">关闭页脚</option>
+                      </select>
+                    </div>
+                    <div className="control-item">
+                      <div className="section-head section-head--compact">
+                        <label htmlFor="footer-left-input">左下角内容</label>
+                        <span className="section-meta">可留空</span>
+                      </div>
+                      <input id="footer-left-input" className="text-input" value={footerLeft} onChange={(event) => setFooterLeft(event.target.value)} placeholder="账号名、署名或栏目名，可留空" />
                     </div>
                     <div className="control-item">
                       <div className="section-head section-head--compact">
                         <label htmlFor="footer-right-mode">右下角内容</label>
-                        <span className="section-meta">默认自动</span>
+                        <span className="section-meta">默认页码</span>
                       </div>
                       <select id="footer-right-mode" className="select-input" value={footerRightMode} onChange={(event) => setFooterRightMode(event.target.value as FooterRightMode)}>
-                        <option value="auto">自动</option>
-                        <option value="blank">留空</option>
                         <option value="page">显示页码</option>
+                        <option value="blank">留空</option>
                         <option value="date">显示北京时间日期</option>
                       </select>
                     </div>
@@ -2254,7 +2297,7 @@ export default function HomePage() {
               <div className="preview-title-row">
                 <h2>实时预览</h2>
                 <div className="theme-quickbar" aria-label="配色快捷切换">
-                  {THEMES.map((item) => (
+                  {THEME_PRESETS.map((item) => (
                     <button
                       key={item.id}
                       type="button"
@@ -2277,7 +2320,13 @@ export default function HomePage() {
             <div className="preview-head-actions">
               <span className="preview-note">所见即所得，3:4 双倍高清 PNG</span>
               <span className="export-help">
-                <button type="button" className="info-button" aria-label="查看导出说明">i</button>
+                <button type="button" className="info-button" aria-label="查看导出说明">
+                  <svg className="info-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M12 16v-4" />
+                    <path d="M12 8h.01" />
+                  </svg>
+                </button>
                 <span className="export-tooltip" role="tooltip">{pages.length} 张卡片将按当前主题批量下载。也可以右键单击单张预览图片保存。</span>
               </span>
               <button className="primary-button preview-primary-button" onClick={() => void handleExportAll()} disabled={isExporting}>
