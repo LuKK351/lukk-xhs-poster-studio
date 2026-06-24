@@ -1965,6 +1965,31 @@ function downloadDataUrl(dataUrl: string, fileName: string) {
   link.remove();
 }
 
+function sanitizeDownloadName(value: string) {
+  return value
+    .trim()
+    .replace(/[\\/:*?"<>|\u0000-\u001f]/g, "-")
+    .replace(/\s+/g, " ")
+    .replace(/^[.\-\s]+|[.\-\s]+$/g, "")
+    .slice(0, 80);
+}
+
+function getExportTimestamp() {
+  const now = new Date();
+  const pad = (value: number) => String(value).padStart(2, "0");
+  return [
+    now.getFullYear(),
+    pad(now.getMonth() + 1),
+    pad(now.getDate())
+  ].join("") + "-" + [pad(now.getHours()), pad(now.getMinutes()), pad(now.getSeconds())].join("");
+}
+
+function createExportFileName(manualTitle: string, index: number, exportTimestamp: string) {
+  const baseName = sanitizeDownloadName(manualTitle.trim() || "LuKK-小红书卡片") || "LuKK-小红书卡片";
+  const pageNumber = String(index + 1).padStart(2, "0");
+  return `${baseName}-${pageNumber}-${exportTimestamp}.png`;
+}
+
 export default function HomePage() {
   const [content, setContent] = useState(DEFAULT_CONTENT);
   const [manualTitle, setManualTitle] = useState("");
@@ -2050,6 +2075,7 @@ export default function HomePage() {
 
   async function handleExportAll() {
     startExportTransition(async () => {
+      const exportTimestamp = getExportTimestamp();
       for (let index = 0; index < pages.length; index += 1) {
         const dataUrl = await renderPosterToDataUrl(
           pages[index],
@@ -2063,7 +2089,7 @@ export default function HomePage() {
           footerEnabled,
           cardCornerMode
         );
-        downloadDataUrl(dataUrl, `xhs-poster-${index + 1}.png`);
+        downloadDataUrl(dataUrl, createExportFileName(manualTitle, index, exportTimestamp));
         await new Promise((resolve) => window.setTimeout(resolve, 120));
       }
     });
@@ -2179,7 +2205,7 @@ export default function HomePage() {
                   </div>
                 </details>
 
-                <details className="accordion-section" open>
+                <details className="accordion-section">
                   <summary className="accordion-summary">排版微调</summary>
                   <div className="accordion-tools">
                     <button
@@ -2269,8 +2295,8 @@ export default function HomePage() {
                         <span className="section-meta">默认页码</span>
                       </div>
                       <select id="footer-right-mode" className="select-input" value={footerRightMode} onChange={(event) => setFooterRightMode(event.target.value as FooterRightMode)}>
-                        <option value="page">显示页码</option>
                         <option value="blank">留空</option>
+                        <option value="page">显示页码</option>
                         <option value="date">显示北京时间日期</option>
                       </select>
                     </div>
