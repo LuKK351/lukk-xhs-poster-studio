@@ -4,6 +4,37 @@
 
 适合先把内容写清楚，再把它快速变成一组能发布、能连续阅读的小红书图文卡片。
 
+## 导出效果
+
+<table>
+  <tr>
+    <td><img src="docs/images/export-main-01.png" alt="导出卡片封面示例" width="360" /></td>
+    <td><img src="docs/images/export-main-02.png" alt="导出卡片正文示例" width="360" /></td>
+  </tr>
+</table>
+
+## 更多主题
+
+<table>
+  <tr>
+    <td><img src="docs/images/theme-sample-01.png" alt="主题示例 1" width="220" /></td>
+    <td><img src="docs/images/theme-sample-02.png" alt="主题示例 2" width="220" /></td>
+    <td><img src="docs/images/theme-sample-03.png" alt="主题示例 3" width="220" /></td>
+  </tr>
+  <tr>
+    <td><img src="docs/images/theme-sample-04.png" alt="主题示例 4" width="220" /></td>
+    <td><img src="docs/images/theme-sample-05.png" alt="主题示例 5" width="220" /></td>
+    <td><img src="docs/images/theme-sample-06.png" alt="主题示例 6" width="220" /></td>
+  </tr>
+  <tr>
+    <td><img src="docs/images/theme-sample-07.png" alt="主题示例 7" width="220" /></td>
+    <td></td>
+    <td></td>
+  </tr>
+</table>
+
+## 界面预览
+
 ![LuKK XHS Poster Studio content editor](docs/images/lukk-xhs-content-editor.png)
 
 ## 适合做什么
