@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import assert from "node:assert/strict";
@@ -6,9 +6,14 @@ import assert from "node:assert/strict";
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const pageSource = readFileSync(join(root, "app/page.tsx"), "utf8");
 const cssSource = readFileSync(join(root, "app/globals.css"), "utf8");
+const launcherScriptPath = join(root, "start_xhs_poster.command");
+assert.ok(existsSync(launcherScriptPath), "desktop launcher target script should exist");
+const launcherScriptSource = readFileSync(launcherScriptPath, "utf8");
 const match = pageSource.match(/const DEFAULT_CONTENT = `([\s\S]*?)`;/);
 
 assert.ok(match, "DEFAULT_CONTENT should be defined as a template string");
+assert.match(launcherScriptSource, /nohup npm run dev -- --port 3000/, "desktop launcher should keep the poster studio running after the launcher exits");
+assert.match(launcherScriptSource, /open "http:\/\/localhost:3000"/, "desktop launcher should open the local poster studio URL");
 
 const defaultContent = match[1];
 const forbiddenPatterns = [
@@ -67,7 +72,7 @@ assert.match(pageSource, /id:\s*"lemon-note"[\s\S]*?grainAlpha:\s*0[\s\S]*?vigne
 assert.match(pageSource, /id:\s*"lemon-note"[\s\S]*?quoteTreatment:\s*"paper"/, "yellow note theme should use a honey-tinted quote block");
 assert.match(pageSource, /id:\s*"lemon-note"[\s\S]*?highlightTreatment:\s*"warmSwipe"/, "yellow editorial theme should use marker-like yellow highlights");
 assert.match(pageSource, /id:\s*"lemon-note"[\s\S]*?highlightMarkerAlpha:\s*0\.24/, "yellow editorial highlights should stay translucent instead of muddy");
-assert.match(pageSource, /type TitleFontMode = "serif" \| "kai" \| "sans" \| "retroSerif";/, "title font modes should include optional retro serif style");
+assert.match(pageSource, /type TitleFontMode = "serif" \| "kai" \| "sans" \| "puhuiti" \| "retroSerif";/, "title font modes should include optional Alibaba PuHuiTi style");
 assert.match(pageSource, /type QuoteTreatment = "paper" \| "callout" \| "code";/, "quote block treatments should be explicit");
 assert.match(pageSource, /type HighlightTreatment = "softUnderline" \| "editorMark" \| "botanicalStroke" \| "warmSwipe" \| "darkGlow" \| "swissRule";/, "highlight treatments should be theme-specific");
 assert.match(pageSource, /id:\s*"warm-editor"[\s\S]*?highlightTreatment:\s*"editorMark"/, "warm gray editorial theme should use an editorial marker highlight");
@@ -79,6 +84,7 @@ assert.match(pageSource, /id:\s*"forest-archive"[\s\S]*?accent:\s*"#c9e879"[\s\S
 assert.match(pageSource, /id:\s*"sage-dawn"[\s\S]*?page:\s*"#eef3ee"[\s\S]*?pageAlt:\s*"#dee7df"[\s\S]*?accent:\s*"#2e5f49"[\s\S]*?titleAccentMix:\s*0\.86[\s\S]*?highlightUnderlineAlpha:\s*0\.7/, "sage dawn should read as a cooler mist-green natural theme");
 assert.match(pageSource, /id:\s*"peach-cloud"[\s\S]*?page:\s*"#f8eadf"[\s\S]*?pageAlt:\s*"#f3d6c7"[\s\S]*?accent:\s*"#c95b32"[\s\S]*?titleAccentMix:\s*0\.84[\s\S]*?highlightMarkerAlpha:\s*0\.38/, "peach cloud should read as a warmer peach-apricot life theme");
 assert.match(pageSource, /label:\s*"复古粗宋"/, "retro serif style should be available in the title style picker");
+assert.match(pageSource, /label:\s*"阿里巴巴普惠体"[\s\S]*?family:\s*"'Alibaba PuHuiTi 3\.0','Alibaba PuHuiTi','Alibaba Sans','PingFang SC','Noto Sans SC',sans-serif"/, "Alibaba PuHuiTi should be available in the title style picker");
 assert.doesNotMatch(pageSource, /墨迹大字|INK_TITLE_OFFSETS|titleFontMode:\s*"ink"/, "ink handwriting title style should be removed");
 assert.match(pageSource, /if \(mode === "serif"\) return 500;/, "default serif title should use a lighter editorial weight");
 assert.match(pageSource, /if \(mode === "retroSerif"\) return 700;/, "optional retro serif title should remain a heavier style");
@@ -87,6 +93,9 @@ assert.match(pageSource, /const titleAccentWeight = settings\.titleFontMode === 
 assert.match(pageSource, /bodyParagraphGap = Math\.max\(30, bodySize \* 1\.25\)/, "paragraph spacing should be clearly larger than line rhythm");
 assert.match(pageSource, /function getQuoteBoxMetrics/, "quote block metrics should be extracted from inline paragraph drawing");
 assert.match(pageSource, /function drawQuoteBlock/, "quote block rendering should be extracted from inline paragraph drawing");
+assert.match(pageSource, /boxOffsetX:\s*-14,[\s\S]*?boxWidthOffset:\s*14,/, "callout quote backgrounds should align their right edge with the body text column");
+assert.match(pageSource, /boxOffsetX:\s*-12,[\s\S]*?boxWidthOffset:\s*12,/, "code quote backgrounds should align their right edge with the body text column");
+assert.match(pageSource, /boxOffsetX:\s*-18,[\s\S]*?boxWidthOffset:\s*18,/, "paper quote backgrounds should align their right edge with the body text column");
 assert.match(pageSource, /layoutPosterPages\(deferredContent, manualTitle, typographySettings, theme\)/, "pagination should account for theme-specific quote treatments");
 assert.match(pageSource, /function selectThemePreset\(targetTheme: ThemeDefinition\)\s*\{\s*setThemeId\(targetTheme\.id\);\s*\}/, "theme selection should preserve manual typography adjustments");
 assert.doesNotMatch(pageSource, /function selectThemePreset\(targetTheme: ThemeDefinition\)\s*\{[\s\S]*?applyThemeEditorDefaults\(targetTheme\)/, "theme selection should not reset editor controls");
@@ -102,6 +111,8 @@ assert.match(pageSource, /setLineHeight\(1\.84\)[\s\S]*?>适中</, "medium line-
 assert.match(pageSource, /setLineHeight\(2\)[\s\S]*?>宽松</, "loose line-height preset should use 2.00");
 assert.match(pageSource, /currentBlock\.kind === "subheading"[\s\S]*baseGap \* 1\.[2-9]/, "subheading should have extra top spacing");
 assert.match(pageSource, /previousBlock\.kind === "subheading"[\s\S]*baseGap \* 1\.[0-9]/, "subheading should have extra bottom spacing");
+assert.match(pageSource, /function isStandaloneMarkdownBlockStart/, "line-level markdown block detection should be extracted");
+assert.match(pageSource, /isStandaloneMarkdownBlockStart\(trimmed\)[\s\S]*?flushCurrentBlock\(\);[\s\S]*?blocks\.push\(trimmed\);/, "quote and heading lines should become standalone blocks without requiring a blank line");
 assert.match(pageSource, /function serializeParagraphBlock/, "paragraph block serialization should be centralized");
 assert.match(pageSource, /if \(kind === "quote"\) return `> \$\{trimmed\}`;/, "quote serialization should preserve quote style after pagination splits");
 assert.match(pageSource, /if \(kind === "subheading"\) return `# \$\{trimmed\}`;/, "split subheading serialization should preserve one heading level");
@@ -114,6 +125,7 @@ assert.match(pageSource, /\[A-Za-z0-9\]\+\(\?:\[._'’&\/\+:-\]\[A-Za-z0-9\]\+\)
 assert.match(pageSource, /function splitOversizedWrapUnit/, "oversized latin units should still have a fallback split to avoid overflow");
 assert.match(pageSource, /isWhitespaceToken\(token\.text\)/, "line wrapping should avoid leading spaces after word-aware breaks");
 assert.match(pageSource, /isLeadingPunctuation\(token\.text\)/, "line wrapping should keep punctuation with the previous line");
+assert.match(pageSource, /if \(highlightStyle === "border"\) \{\s*context\.setLineDash\(\[10, 5\]\);[\s\S]*?\} else if \(theme\.mode !== "swiss"\) \{[\s\S]*?context\.setLineDash\(\[10, 5\]\);/, "dashed underline should stay dashed when the border highlight option is selected");
 assert.match(pageSource, /const bodyAnchorTitleStartY = 196;/, "cover body should keep its previous vertical anchor");
 assert.match(pageSource, /const titleStartY = 218;/, "cover title should sink closer to the fixed body block");
 assert.match(pageSource, /const separatorY = titleBlock \? bodyAnchorTitleStartY \+ titleBlock\.titleLines\.length \* titleBlock\.titleLineHeight - 18 : 110;/, "cover body should not move when the title is lowered");

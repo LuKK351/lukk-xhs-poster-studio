@@ -69,7 +69,7 @@ type TypographySettings = {
 type FooterRightMode = "blank" | "page" | "date";
 type CardCornerMode = "rounded" | "square";
 type SidebarTab = "content" | "style";
-type TitleFontMode = "serif" | "kai" | "sans" | "retroSerif";
+type TitleFontMode = "serif" | "kai" | "sans" | "puhuiti" | "retroSerif";
 type HighlightStyle = "underline" | "marker" | "border";
 type QuoteTreatment = "paper" | "callout" | "code";
 type HighlightTreatment = "softUnderline" | "editorMark" | "botanicalStroke" | "warmSwipe" | "darkGlow" | "swissRule";
@@ -573,6 +573,11 @@ const TITLE_FONT_MODES: Record<
     family: "'DingTalk JinBuTi','PingFang SC','Noto Sans SC',sans-serif",
     latinFamily: "'DingTalk JinBuTi','PingFang SC','Noto Sans SC',sans-serif"
   },
+  puhuiti: {
+    label: "阿里巴巴普惠体",
+    family: "'Alibaba PuHuiTi 3.0','Alibaba PuHuiTi','Alibaba Sans','PingFang SC','Noto Sans SC',sans-serif",
+    latinFamily: "'Alibaba PuHuiTi 3.0','Alibaba PuHuiTi','Alibaba Sans','PingFang SC','Noto Sans SC',sans-serif"
+  },
   retroSerif: {
     label: "复古粗宋",
     family: RETRO_SERIF_FONT_FAMILY,
@@ -598,7 +603,7 @@ const THEME_PRESETS = THEME_PRESET_ORDER
 function getTitleFontWeight(mode: TitleFontMode) {
   if (mode === "serif") return 500;
   if (mode === "retroSerif") return 700;
-  return mode === "sans" ? 600 : 500;
+  return mode === "sans" || mode === "puhuiti" ? 600 : 500;
 }
 
 function getTitleTracking(size: number, mode: TitleFontMode) {
@@ -611,13 +616,37 @@ function getTitleLineHeightRatio(mode: TitleFontMode) {
   return mode === "serif" ? 1.08 : mode === "kai" ? 1.1 : 1.06;
 }
 
+function isStandaloneMarkdownBlockStart(line: string) {
+  return /^#{1,6}\s+/.test(line) || /^>\s?/.test(line);
+}
+
 function parseInput(raw: string) {
   const normalized = raw.replace(/\r\n/g, "\n").trim();
   if (!normalized) return { paragraphs: [] as string[] };
-  const blocks = normalized
-    .split(/\n{2,}/)
-    .map((block) => block.trim())
-    .filter(Boolean);
+
+  const blocks: string[] = [];
+  let currentBlock: string[] = [];
+  const flushCurrentBlock = () => {
+    if (!currentBlock.length) return;
+    blocks.push(currentBlock.join("\n").trim());
+    currentBlock = [];
+  };
+
+  for (const line of normalized.split("\n")) {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      flushCurrentBlock();
+      continue;
+    }
+    if (isStandaloneMarkdownBlockStart(trimmed)) {
+      flushCurrentBlock();
+      blocks.push(trimmed);
+      continue;
+    }
+    currentBlock.push(trimmed);
+  }
+  flushCurrentBlock();
+
   return { paragraphs: blocks };
 }
 
@@ -1213,7 +1242,7 @@ function getQuoteBoxMetrics(theme: ThemeDefinition, fontSize: number, maxWidth: 
       paddingTop: padding,
       paddingBottom: padding,
       boxOffsetX: -14,
-      boxWidthOffset: -10,
+      boxWidthOffset: 14,
       barOffsetX: -8,
       barTopInset: 12,
       barBottomInset: 24,
@@ -1229,7 +1258,7 @@ function getQuoteBoxMetrics(theme: ThemeDefinition, fontSize: number, maxWidth: 
       paddingTop: padding,
       paddingBottom: padding,
       boxOffsetX: -12,
-      boxWidthOffset: -12,
+      boxWidthOffset: 12,
       barOffsetX: -7,
       barTopInset: 10,
       barBottomInset: 20,
@@ -1245,7 +1274,7 @@ function getQuoteBoxMetrics(theme: ThemeDefinition, fontSize: number, maxWidth: 
     paddingTop: padding,
     paddingBottom: padding,
     boxOffsetX: -18,
-    boxWidthOffset: -8,
+    boxWidthOffset: 18,
     barOffsetX: -12,
     barTopInset: 14,
     barBottomInset: 28,
@@ -1370,7 +1399,11 @@ function drawHighlightMark(
     context.strokeStyle = hexToRgba(accent, Math.max(theme.components.highlightDashAlpha, 0.78));
     context.lineWidth = theme.mode === "swiss" ? 4 : 3.2;
     context.lineCap = theme.mode === "swiss" ? "butt" : "round";
-    if (highlightStyle === "border" && theme.mode !== "swiss") context.setLineDash([10, 5]);
+    if (highlightStyle === "border") {
+      context.setLineDash([10, 5]);
+    } else if (theme.mode !== "swiss") {
+      context.setLineDash([10, 5]);
+    }
     context.beginPath();
     context.moveTo(x - 1, baselineY + Math.max(5, fontSize * 0.12));
     context.lineTo(x + tokenWidth + 1, baselineY + Math.max(5, fontSize * 0.12));
@@ -1890,7 +1923,7 @@ async function renderPosterToDataUrl(
   if (page.kind === "cover" && page.title.trim()) {
     const accentRanges = metrics.titleAccentRanges;
     const titleAccentColor = mixHexColors(theme.palette.text, theme.palette.accent, theme.surface.titleAccentMix);
-    const titleAccentWeight = settings.titleFontMode === "serif" ? 600 : settings.titleFontMode === "retroSerif" || settings.titleFontMode === "sans" ? 700 : 600;
+    const titleAccentWeight = settings.titleFontMode === "serif" ? 600 : settings.titleFontMode === "retroSerif" || settings.titleFontMode === "sans" || settings.titleFontMode === "puhuiti" ? 700 : 600;
 
     drawCoverOrnament(context, theme, metrics);
 
