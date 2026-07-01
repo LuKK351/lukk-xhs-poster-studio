@@ -81,7 +81,7 @@ assert.match(pageSource, /id:\s*"warm-editor"[\s\S]*?highlightTreatment:\s*"edit
 assert.match(pageSource, /id:\s*"swiss-modern"[\s\S]*?highlightTreatment:\s*"swissRule"/, "swiss theme should use a crisp rule highlight");
 assert.match(pageSource, /function resolveHighlightTreatment/, "highlight treatment resolution should be extracted");
 assert.match(pageSource, /function drawHighlightMark/, "highlight rendering should be extracted from paragraph drawing");
-assert.match(pageSource, /const BODY_BOLD_WEIGHT = 450;/, "bold body text should stay lighter than the previous heavy emphasis");
+assert.match(pageSource, /const BODY_BOLD_WEIGHT = 400;/, "bold body text should stay lighter than the previous heavy emphasis");
 assert.match(pageSource, /const font = `\$\{token\.bold \? BODY_BOLD_WEIGHT : BODY_TEXT_WEIGHT\}/, "highlight marks should not increase measured text weight");
 assert.doesNotMatch(pageSource, /token\.mark \? 600|token\.mark \? 500/, "highlight marks should not make text bolder");
 assert.match(pageSource, /id:\s*"moss-paper"[\s\S]*?accent:\s*"#3f8f58"[\s\S]*?titleAccentMix:\s*0\.86[\s\S]*?highlightUnderlineAlpha:\s*0\.72/, "moss-paper emphasis should stay visible in small previews");
