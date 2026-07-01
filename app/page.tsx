@@ -103,7 +103,7 @@ type InlineLine = {
 };
 
 type ParagraphBlock = {
-  kind: "body" | "quote" | "subheading";
+  kind: "body" | "quote" | "subheading" | "divider";
   raw: string;
 };
 
@@ -524,7 +524,9 @@ const DEFAULT_CONTENT = `这套工具适合把已经写好的文字快速排成�
 
 > 引用会独立成块，适合放提醒。
 
-标题可以留空，也可以单独写一句封面标题。字号、行距、页脚和边角都能在面板里调整；内容过长时会自动拆页，引用、重点和小标题会跟着段落走。
+---
+
+标题可以留空，也可以单独写一句封面标题。字号、行距、页脚和边角都能在面板里调整；内容过长时会自动拆页，引用、重点、小标题和分割线会跟着段落走。
 
 改完后直接导出图片，适合发布前确认排版，也适合把同一段文字做成一组连续卡片。你只需要关心内容是否准确，剩下的版式交给预览来对齐。`;
 
@@ -623,8 +625,12 @@ function getTitleLineHeightRatio(mode: TitleFontMode) {
   return mode === "serif" ? 1.08 : mode === "kai" ? 1.1 : 1.06;
 }
 
+function isMarkdownDividerLine(line: string) {
+  return line.trim() === "---";
+}
+
 function isStandaloneMarkdownBlockStart(line: string) {
-  return /^#{1,6}\s+/.test(line) || /^>\s?/.test(line);
+  return /^#{1,6}\s+/.test(line) || /^>\s?/.test(line) || isMarkdownDividerLine(line);
 }
 
 function parseInput(raw: string) {
@@ -867,6 +873,9 @@ function parseInlineMarkdown(text: string) {
 
 function getParagraphBlock(text: string): ParagraphBlock {
   const trimmed = text.trim();
+  if (isMarkdownDividerLine(trimmed)) {
+    return { kind: "divider", raw: "" };
+  }
   const markdownHeadingMatch = trimmed.match(/^#{1,6}\s+(.+)$/);
   if (markdownHeadingMatch) {
     return { kind: "subheading", raw: markdownHeadingMatch[1].trim() };
@@ -975,6 +984,7 @@ function wrapInlineTokensByWidth(tokens: InlineToken[], fontSize: number, maxWid
 
 function serializeParagraphBlock(raw: string, kind: ParagraphBlock["kind"]) {
   const trimmed = raw.trim();
+  if (kind === "divider") return "---";
   if (!trimmed) return "";
   if (kind === "quote") return `> ${trimmed}`;
   if (kind === "subheading") return `# ${trimmed}`;
@@ -1230,6 +1240,10 @@ function getSubheadingLineHeight(lineHeight: number, subheadingStyle: Subheading
   return subheadingStyle === "large" ? lineHeight * 1.02 : lineHeight;
 }
 
+function getDividerBlockHeight(fontSize: number) {
+  return Math.max(18, fontSize * 0.72);
+}
+
 function getParagraphMaxLines(
   block: ParagraphBlock,
   availableHeight: number,
@@ -1238,6 +1252,9 @@ function getParagraphMaxLines(
   theme: ThemeDefinition,
   subheadingStyle: SubheadingStyle
 ) {
+  if (block.kind === "divider") {
+    return availableHeight >= getDividerBlockHeight(fontSize) ? 1 : 0;
+  }
   const activeFontSize = block.kind === "subheading" ? getSubheadingFontSize(fontSize, subheadingStyle) : fontSize;
   const activeLineHeight = block.kind === "subheading" ? getSubheadingLineHeight(lineHeight, subheadingStyle) : lineHeight;
   const quoteMetrics = block.kind === "quote" ? getQuoteBoxMetrics(theme, activeFontSize, CONTENT_WIDTH) : null;
@@ -1440,6 +1457,19 @@ function drawHighlightMark(
   context.restore();
 }
 
+function drawDividerBlock(context: CanvasRenderingContext2D, theme: ThemeDefinition, x: number, y: number, maxWidth: number, height: number) {
+  context.save();
+  context.globalCompositeOperation = isDarkPosterTheme(theme) ? "screen" : "multiply";
+  context.strokeStyle = hexToRgba(theme.palette.accent, isDarkPosterTheme(theme) ? 0.34 : 0.26);
+  context.lineWidth = 1;
+  context.lineCap = "round";
+  context.beginPath();
+  context.moveTo(x + maxWidth * 0.08, y + height * 0.5);
+  context.lineTo(x + maxWidth * 0.92, y + height * 0.5);
+  context.stroke();
+  context.restore();
+}
+
 function measureParagraphBlock(
   block: ParagraphBlock,
   fontSize: number,
@@ -1448,6 +1478,12 @@ function measureParagraphBlock(
   theme: ThemeDefinition,
   subheadingStyle: SubheadingStyle
 ) {
+  if (block.kind === "divider") {
+    return {
+      lines: [] as InlineLine[],
+      height: getDividerBlockHeight(fontSize)
+    };
+  }
   const activeFontSize = block.kind === "subheading" ? getSubheadingFontSize(fontSize, subheadingStyle) : fontSize;
   const activeLineHeight = block.kind === "subheading" ? getSubheadingLineHeight(lineHeight, subheadingStyle) : lineHeight;
   const quoteMetrics = block.kind === "quote" ? getQuoteBoxMetrics(theme, activeFontSize, maxWidth) : null;
@@ -1476,6 +1512,12 @@ function drawInlineParagraph(
   highlightStyle: HighlightStyle,
   subheadingStyle: SubheadingStyle
 ) {
+  if (block.kind === "divider") {
+    const height = getDividerBlockHeight(fontSize);
+    drawDividerBlock(context, theme, x, y, maxWidth, height);
+    return 0;
+  }
+
   const isQuote = block.kind === "quote";
   const isSubheading = block.kind === "subheading";
   const activeFontSize = isSubheading ? getSubheadingFontSize(fontSize, subheadingStyle) : fontSize;

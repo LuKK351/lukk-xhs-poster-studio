@@ -6,6 +6,7 @@ import assert from "node:assert/strict";
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const pageSource = readFileSync(join(root, "app/page.tsx"), "utf8");
 const cssSource = readFileSync(join(root, "app/globals.css"), "utf8");
+const readmeSource = readFileSync(join(root, "README.md"), "utf8");
 const launcherScriptPath = join(root, "start_xhs_poster.command");
 assert.ok(existsSync(launcherScriptPath), "desktop launcher target script should exist");
 const launcherScriptSource = readFileSync(launcherScriptPath, "utf8");
@@ -35,6 +36,7 @@ for (const pattern of forbiddenPatterns) {
 const primaryHeadingMatches = defaultContent.match(/^#\s+/gm) ?? [];
 assert.equal(primaryHeadingMatches.length, 1, "DEFAULT_CONTENT should include exactly one primary heading sample");
 assert.match(defaultContent, /^>\s+/m, "DEFAULT_CONTENT should include a quote sample");
+assert.match(defaultContent, /^---$/m, "DEFAULT_CONTENT should include a markdown divider sample");
 const quoteSample = defaultContent.match(/^>\s+(.+)$/m)?.[1] ?? "";
 assert.ok(quoteSample.length > 0 && quoteSample.length <= 34, "quote sample should be short and reusable");
 assert.match(defaultContent, /\*\*.+?\*\*/, "DEFAULT_CONTENT should include a bold emphasis sample");
@@ -118,10 +120,13 @@ assert.match(pageSource, /previousBlock\.kind === "subheading"[\s\S]*baseGap \* 
 assert.match(pageSource, /function getSubheadingFontSize[\s\S]*?subheadingStyle === "large" \? Math\.round\(fontSize \* 1\.08\) : fontSize;/, "accent subheading style should keep body-sized text");
 assert.match(pageSource, /context\.fillStyle = isSubheading && subheadingStyle === "accent" \? theme\.palette\.accent : theme\.palette\.text;/, "accent subheading style should use the theme accent color");
 assert.match(pageSource, /function isStandaloneMarkdownBlockStart/, "line-level markdown block detection should be extracted");
-assert.match(pageSource, /isStandaloneMarkdownBlockStart\(trimmed\)[\s\S]*?flushCurrentBlock\(\);[\s\S]*?blocks\.push\(trimmed\);/, "quote and heading lines should become standalone blocks without requiring a blank line");
+assert.match(pageSource, /function isMarkdownDividerLine\(line: string\) \{\s*return line\.trim\(\) === "---";\s*\}/, "markdown divider support should only recognize the common --- line");
+assert.match(pageSource, /isStandaloneMarkdownBlockStart\(trimmed\)[\s\S]*?flushCurrentBlock\(\);[\s\S]*?blocks\.push\(trimmed\);/, "quote, heading, and divider lines should become standalone blocks without requiring a blank line");
 assert.match(pageSource, /function serializeParagraphBlock/, "paragraph block serialization should be centralized");
+assert.match(pageSource, /if \(kind === "divider"\) return "---";/, "divider serialization should preserve markdown divider syntax");
 assert.match(pageSource, /if \(kind === "quote"\) return `> \$\{trimmed\}`;/, "quote serialization should preserve quote style after pagination splits");
 assert.match(pageSource, /if \(kind === "subheading"\) return `# \$\{trimmed\}`;/, "split subheading serialization should preserve one heading level");
+assert.match(pageSource, /function drawDividerBlock[\s\S]*?theme\.palette\.accent[\s\S]*?lineWidth = 1;/, "markdown divider should render as a lightweight theme-colored line");
 assert.match(pageSource, /splitParagraphBlockBySentence\(block, currentText\)/, "sentence-based pagination should preserve the original block kind");
 assert.match(pageSource, /if \(wasCarryingParagraph\) \{\s*carryParagraph = "";\s*currentParagraph \+= 1;/, "consumed carry paragraphs should advance the source paragraph index");
 assert.match(pageSource, /splitLongParagraph\(block\.raw, chunkSize\)\.map\(\(chunk\) => serializeParagraphBlock\(chunk, block\.kind\)\)/, "long paragraph pre-splits should preserve quote and heading markers");
@@ -196,5 +201,6 @@ assert.match(pageSource, /<label htmlFor="title-font-mode">标题样式<\/label>
 assert.match(pageSource, /<label htmlFor="subheading-style">小标题样式<\/label>\s*<span className="section-meta">Markdown #<\/span>/, "subheading style picker should explain it applies to markdown headings");
 assert.match(pageSource, /<option value="large">放大加粗<\/option>\s*<option value="accent">主题异色<\/option>/, "subheading style picker should offer large and accent modes");
 assert.match(pageSource, /<label htmlFor="highlight-style">高亮样式<\/label>\s*<span className="section-meta">随主题变化<\/span>/, "highlight helper should sit inline at the right");
+assert.match(readmeSource, /分割线 `---`/, "README should document markdown divider syntax");
 assert.match(pageSource, /LEGACY_DEFAULT_CONTENT_PATTERNS/, "legacy default content patterns should be defined");
 assert.match(pageSource, /setContent\(\(current\) => \(isLegacyDefaultContent\(current\) \? DEFAULT_CONTENT : current\)\)/, "legacy default content should be migrated without overwriting custom content");
