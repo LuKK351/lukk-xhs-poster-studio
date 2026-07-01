@@ -64,12 +64,14 @@ type TypographySettings = {
   bodySize: number;
   lineHeight: number;
   titleFontMode: TitleFontMode;
+  subheadingStyle: SubheadingStyle;
 };
 
 type FooterRightMode = "blank" | "page" | "date";
 type CardCornerMode = "rounded" | "square";
 type SidebarTab = "content" | "style";
 type TitleFontMode = "serif" | "kai" | "sans" | "puhuiti" | "retroSerif";
+type SubheadingStyle = "large" | "accent";
 type HighlightStyle = "underline" | "marker" | "border";
 type QuoteTreatment = "paper" | "callout" | "code";
 type HighlightTreatment = "softUnderline" | "editorMark" | "botanicalStroke" | "warmSwipe" | "darkGlow" | "swissRule";
@@ -599,6 +601,7 @@ const THEME_PRESET_ORDER = [
 const THEME_PRESETS = THEME_PRESET_ORDER
   .map((themeId) => THEMES.find((theme) => theme.id === themeId))
   .filter((theme): theme is ThemeDefinition => Boolean(theme));
+const DEFAULT_SUBHEADING_STYLE: SubheadingStyle = "large";
 
 function getTitleFontWeight(mode: TitleFontMode) {
   if (mode === "serif") return 500;
@@ -1204,8 +1207,8 @@ function getGapBetweenBlocks(
   if (!previousBlock) return 0;
   const baseGap = metrics.bodyParagraphGap;
   const quoteGap = baseGap * 1.08 + 4;
-  if (currentBlock.kind === "subheading") return baseGap * 1.38;
-  if (previousBlock.kind === "subheading") return baseGap * 1.18;
+  if (currentBlock.kind === "subheading") return baseGap * 1.62;
+  if (previousBlock.kind === "subheading") return baseGap * 1.3;
   if (previousBlock.kind === "quote" || currentBlock.kind === "quote") return quoteGap;
   return baseGap;
 }
@@ -1215,15 +1218,24 @@ function getParagraphVisualHeight(lineCount: number, fontSize: number, lineHeigh
   return fontSize + Math.max(0, lineCount - 1) * lineHeight;
 }
 
+function getSubheadingFontSize(fontSize: number, subheadingStyle: SubheadingStyle) {
+  return subheadingStyle === "large" ? Math.round(fontSize * 1.08) : fontSize;
+}
+
+function getSubheadingLineHeight(lineHeight: number, subheadingStyle: SubheadingStyle) {
+  return subheadingStyle === "large" ? lineHeight * 1.02 : lineHeight;
+}
+
 function getParagraphMaxLines(
   block: ParagraphBlock,
   availableHeight: number,
   fontSize: number,
   lineHeight: number,
-  theme: ThemeDefinition
+  theme: ThemeDefinition,
+  subheadingStyle: SubheadingStyle
 ) {
-  const activeFontSize = block.kind === "subheading" ? Math.round(fontSize * 1.08) : fontSize;
-  const activeLineHeight = block.kind === "subheading" ? lineHeight * 1.02 : lineHeight;
+  const activeFontSize = block.kind === "subheading" ? getSubheadingFontSize(fontSize, subheadingStyle) : fontSize;
+  const activeLineHeight = block.kind === "subheading" ? getSubheadingLineHeight(lineHeight, subheadingStyle) : lineHeight;
   const quoteMetrics = block.kind === "quote" ? getQuoteBoxMetrics(theme, activeFontSize, CONTENT_WIDTH) : null;
   const quotePaddingTop = quoteMetrics?.paddingTop ?? 0;
   const quotePaddingBottom = quoteMetrics?.paddingBottom ?? 0;
@@ -1424,9 +1436,16 @@ function drawHighlightMark(
   context.restore();
 }
 
-function measureParagraphBlock(block: ParagraphBlock, fontSize: number, lineHeight: number, maxWidth: number, theme: ThemeDefinition) {
-  const activeFontSize = block.kind === "subheading" ? Math.round(fontSize * 1.08) : fontSize;
-  const activeLineHeight = block.kind === "subheading" ? lineHeight * 1.02 : lineHeight;
+function measureParagraphBlock(
+  block: ParagraphBlock,
+  fontSize: number,
+  lineHeight: number,
+  maxWidth: number,
+  theme: ThemeDefinition,
+  subheadingStyle: SubheadingStyle
+) {
+  const activeFontSize = block.kind === "subheading" ? getSubheadingFontSize(fontSize, subheadingStyle) : fontSize;
+  const activeLineHeight = block.kind === "subheading" ? getSubheadingLineHeight(lineHeight, subheadingStyle) : lineHeight;
   const quoteMetrics = block.kind === "quote" ? getQuoteBoxMetrics(theme, activeFontSize, maxWidth) : null;
   const quoteWidth = quoteMetrics?.textWidth ?? maxWidth;
   const lines = wrapInlineTokensByWidth(parseInlineMarkdown(block.raw), activeFontSize, quoteWidth);
@@ -1450,12 +1469,13 @@ function drawInlineParagraph(
   lineHeight: number,
   maxWidth: number,
   theme: ThemeDefinition,
-  highlightStyle: HighlightStyle
+  highlightStyle: HighlightStyle,
+  subheadingStyle: SubheadingStyle
 ) {
   const isQuote = block.kind === "quote";
   const isSubheading = block.kind === "subheading";
-  const activeFontSize = isSubheading ? Math.round(fontSize * 1.08) : fontSize;
-  const activeLineHeight = isSubheading ? lineHeight * 1.02 : lineHeight;
+  const activeFontSize = isSubheading ? getSubheadingFontSize(fontSize, subheadingStyle) : fontSize;
+  const activeLineHeight = isSubheading ? getSubheadingLineHeight(lineHeight, subheadingStyle) : lineHeight;
   const quoteMetrics = isQuote ? getQuoteBoxMetrics(theme, activeFontSize, maxWidth) : null;
   const quoteInset = quoteMetrics?.textInset ?? 0;
   const quoteWidth = quoteMetrics?.textWidth ?? maxWidth;
@@ -1487,7 +1507,7 @@ function drawInlineParagraph(
       const weight = isSubheading ? 600 : token.mark ? 600 : token.bold ? 500 : isQuote ? 400 : 300;
       context.globalCompositeOperation = isDarkPosterTheme(theme) ? "screen" : "multiply";
       context.font = `${weight} ${activeFontSize}px ${BODY_FONT_FAMILY}`;
-      context.fillStyle = theme.palette.text;
+      context.fillStyle = isSubheading && subheadingStyle === "accent" ? theme.palette.accent : theme.palette.text;
       context.fillText(token.text, cursorX, baselineY);
       context.restore();
       cursorX += tokenWidth;
@@ -1544,7 +1564,7 @@ function layoutPosterPages(raw: string, manualTitle: string, settings: Typograph
       const currentText = wasCarryingParagraph ? carryParagraph : expandedParagraphs[currentParagraph];
       const block = getParagraphBlock(currentText);
       const leadingGap = getGapBetweenBlocks(previousBlock, block, metrics);
-      const { lines, height } = measureParagraphBlock(block, metrics.bodySize, metrics.bodyLineHeight, metrics.bodyWidth, theme);
+      const { lines, height } = measureParagraphBlock(block, metrics.bodySize, metrics.bodyLineHeight, metrics.bodyWidth, theme, settings.subheadingStyle);
       const blockTop = cursorY + leadingGap;
       const blockBottom = blockTop + height;
 
@@ -1569,7 +1589,7 @@ function layoutPosterPages(raw: string, manualTitle: string, settings: Typograph
           const candidateRaw = fittedRaw ? `${fittedRaw}${sentenceSplit.separator}${sentence}` : sentence;
           const candidate = sentenceSplit.serialize(candidateRaw);
           const candidateBlock = getParagraphBlock(candidate);
-          const { height: candidateHeight } = measureParagraphBlock(candidateBlock, metrics.bodySize, metrics.bodyLineHeight, metrics.bodyWidth, theme);
+          const { height: candidateHeight } = measureParagraphBlock(candidateBlock, metrics.bodySize, metrics.bodyLineHeight, metrics.bodyWidth, theme, settings.subheadingStyle);
           if (blockTop + candidateHeight <= metrics.bodyBottomY) {
             fittedRaw = candidateRaw;
             fittedCount += 1;
@@ -1590,7 +1610,7 @@ function layoutPosterPages(raw: string, manualTitle: string, settings: Typograph
       if (page.paragraphs.length > 0) break;
 
       const remainingHeight = metrics.bodyBottomY - blockTop;
-      const maxLines = getParagraphMaxLines(block, remainingHeight, metrics.bodySize, metrics.bodyLineHeight, theme);
+      const maxLines = getParagraphMaxLines(block, remainingHeight, metrics.bodySize, metrics.bodyLineHeight, theme, settings.subheadingStyle);
       if (maxLines <= 0) break;
       const { takenRaw, restRaw } = splitInlineLines(lines, maxLines);
       const taken = takenRaw(block.kind);
@@ -1966,7 +1986,7 @@ async function renderPosterToDataUrl(
   page.paragraphs.forEach((paragraph) => {
     const block = getParagraphBlock(paragraph);
     paragraphY += getGapBetweenBlocks(previousBlock, block, metrics);
-    const { height } = measureParagraphBlock(block, metrics.bodySize, metrics.bodyLineHeight, metrics.bodyWidth, theme);
+    const { height } = measureParagraphBlock(block, metrics.bodySize, metrics.bodyLineHeight, metrics.bodyWidth, theme, settings.subheadingStyle);
     const blockBottom = paragraphY + height;
     if (blockBottom > metrics.bodyBottomY) return;
     drawInlineParagraph(
@@ -1978,7 +1998,8 @@ async function renderPosterToDataUrl(
       metrics.bodyLineHeight,
       metrics.bodyWidth,
       theme,
-      highlightStyle
+      highlightStyle,
+      settings.subheadingStyle
     );
     paragraphY = blockBottom;
     previousBlock = block;
@@ -2032,6 +2053,7 @@ export default function HomePage() {
   const [bodySize, setBodySize] = useState(INITIAL_THEME.editor.bodySize);
   const [lineHeight, setLineHeight] = useState(INITIAL_THEME.editor.lineHeight);
   const [titleFontMode, setTitleFontMode] = useState<TitleFontMode>(INITIAL_THEME.editor.titleFontMode);
+  const [subheadingStyle, setSubheadingStyle] = useState<SubheadingStyle>(DEFAULT_SUBHEADING_STYLE);
   const [highlightStyle, setHighlightStyle] = useState<HighlightStyle>(INITIAL_THEME.editor.highlightStyle);
   const [footerEnabled, setFooterEnabled] = useState(true);
   const [footerLeft, setFooterLeft] = useState("困困");
@@ -2049,10 +2071,11 @@ export default function HomePage() {
     bodySize !== theme.editor.bodySize ||
     lineHeight !== theme.editor.lineHeight ||
     titleFontMode !== theme.editor.titleFontMode ||
+    subheadingStyle !== DEFAULT_SUBHEADING_STYLE ||
     highlightStyle !== theme.editor.highlightStyle;
   const typographySettings = useMemo(
-    () => ({ titleSize, bodySize, lineHeight, titleFontMode }),
-    [titleSize, bodySize, lineHeight, titleFontMode]
+    () => ({ titleSize, bodySize, lineHeight, titleFontMode, subheadingStyle }),
+    [titleSize, bodySize, lineHeight, titleFontMode, subheadingStyle]
   );
 
   function applyThemeEditorDefaults(targetTheme: ThemeDefinition = theme) {
@@ -2060,6 +2083,7 @@ export default function HomePage() {
     setBodySize(targetTheme.editor.bodySize);
     setLineHeight(targetTheme.editor.lineHeight);
     setTitleFontMode(targetTheme.editor.titleFontMode);
+    setSubheadingStyle(DEFAULT_SUBHEADING_STYLE);
     setHighlightStyle(targetTheme.editor.highlightStyle);
   }
 
@@ -2260,6 +2284,16 @@ export default function HomePage() {
                         {Object.entries(TITLE_FONT_MODES).map(([id, config]) => (
                           <option key={id} value={id}>{config.label}</option>
                         ))}
+                      </select>
+                    </div>
+                    <div className="control-item">
+                      <div className="section-head section-head--compact">
+                        <label htmlFor="subheading-style">小标题样式</label>
+                        <span className="section-meta">Markdown #</span>
+                      </div>
+                      <select id="subheading-style" className="select-input" value={subheadingStyle} onChange={(event) => setSubheadingStyle(event.target.value as SubheadingStyle)}>
+                        <option value="large">放大加粗</option>
+                        <option value="accent">主题异色</option>
                       </select>
                     </div>
                     <div className="control-item">

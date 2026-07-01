@@ -109,8 +109,11 @@ assert.match(pageSource, /const titleWash = context\.createRadialGradient/, "pos
 assert.match(pageSource, /setLineHeight\(1\.68\)[\s\S]*?>紧凑</, "compact line-height preset should use 1.68");
 assert.match(pageSource, /setLineHeight\(1\.84\)[\s\S]*?>适中</, "medium line-height preset should use 1.84");
 assert.match(pageSource, /setLineHeight\(2\)[\s\S]*?>宽松</, "loose line-height preset should use 2.00");
-assert.match(pageSource, /currentBlock\.kind === "subheading"[\s\S]*baseGap \* 1\.[2-9]/, "subheading should have extra top spacing");
-assert.match(pageSource, /previousBlock\.kind === "subheading"[\s\S]*baseGap \* 1\.[0-9]/, "subheading should have extra bottom spacing");
+assert.match(pageSource, /type SubheadingStyle = "large" \| "accent";/, "subheading style should support large and accent modes");
+assert.match(pageSource, /currentBlock\.kind === "subheading"[\s\S]*baseGap \* 1\.62/, "subheading should have larger top spacing");
+assert.match(pageSource, /previousBlock\.kind === "subheading"[\s\S]*baseGap \* 1\.3/, "subheading should have larger bottom spacing that remains smaller than top spacing");
+assert.match(pageSource, /function getSubheadingFontSize[\s\S]*?subheadingStyle === "large" \? Math\.round\(fontSize \* 1\.08\) : fontSize;/, "accent subheading style should keep body-sized text");
+assert.match(pageSource, /context\.fillStyle = isSubheading && subheadingStyle === "accent" \? theme\.palette\.accent : theme\.palette\.text;/, "accent subheading style should use the theme accent color");
 assert.match(pageSource, /function isStandaloneMarkdownBlockStart/, "line-level markdown block detection should be extracted");
 assert.match(pageSource, /isStandaloneMarkdownBlockStart\(trimmed\)[\s\S]*?flushCurrentBlock\(\);[\s\S]*?blocks\.push\(trimmed\);/, "quote and heading lines should become standalone blocks without requiring a blank line");
 assert.match(pageSource, /function serializeParagraphBlock/, "paragraph block serialization should be centralized");
@@ -187,6 +190,8 @@ assert.match(cssSource, /\.select-input \{[\s\S]*?appearance: none;/, "select co
 assert.doesNotMatch(pageSource, /className="field-hint"/, "select helper copy should move to inline right metadata");
 assert.doesNotMatch(cssSource, /\.field-hint \{/, "obsolete below-control helper styling should be removed");
 assert.match(pageSource, /<label htmlFor="title-font-mode">标题样式<\/label>\s*<span className="section-meta">字体气质<\/span>/, "title style helper should sit inline at the right");
+assert.match(pageSource, /<label htmlFor="subheading-style">小标题样式<\/label>\s*<span className="section-meta">Markdown #<\/span>/, "subheading style picker should explain it applies to markdown headings");
+assert.match(pageSource, /<option value="large">放大加粗<\/option>\s*<option value="accent">主题异色<\/option>/, "subheading style picker should offer large and accent modes");
 assert.match(pageSource, /<label htmlFor="highlight-style">高亮样式<\/label>\s*<span className="section-meta">随主题变化<\/span>/, "highlight helper should sit inline at the right");
 assert.match(pageSource, /LEGACY_DEFAULT_CONTENT_PATTERNS/, "legacy default content patterns should be defined");
 assert.match(pageSource, /setContent\(\(current\) => \(isLegacyDefaultContent\(current\) \? DEFAULT_CONTENT : current\)\)/, "legacy default content should be migrated without overwriting custom content");
