@@ -554,6 +554,10 @@ const TITLE_FONT_FAMILY = "'Source Han Serif SC Heavy','Source Han Serif SC','No
 const RETRO_SERIF_FONT_FAMILY = "'FZYaSongS-B-GB','FZYaSong-M-GBK','HYDaSongJ','Source Han Serif SC Heavy','Source Han Serif SC','Songti SC','STSong',serif";
 const BODY_FONT_FAMILY = "'PingFang SC','Hiragino Sans GB','Noto Sans SC',sans-serif";
 const FOOTER_FONT_FAMILY = "'SF Mono','JetBrains Mono','Courier New','PingFang SC','Noto Sans SC',monospace";
+const BODY_TEXT_WEIGHT = 300;
+const BODY_BOLD_WEIGHT = 450;
+const QUOTE_TEXT_WEIGHT = 400;
+const SUBHEADING_TEXT_WEIGHT = 600;
 const LEADING_PUNCTUATION = new Set(Array.from("，。！？、；：）》」』】〕］〉〗’”%、,.!?;:)]}"));
 
 const TITLE_FONT_MODES: Record<
@@ -903,7 +907,7 @@ function serializeInlineTokens(tokens: InlineToken[]) {
 
 function getBodyTokenWidth(token: InlineToken, fontSize: number) {
   if (token.text === "\n") return 0;
-  const font = `${token.bold ? 500 : token.mark ? 500 : 300} ${fontSize}px ${BODY_FONT_FAMILY}`;
+  const font = `${token.bold ? BODY_BOLD_WEIGHT : BODY_TEXT_WEIGHT} ${fontSize}px ${BODY_FONT_FAMILY}`;
   return getMeasureContext(font).measureText(token.text).width;
 }
 
@@ -1504,7 +1508,13 @@ function drawInlineParagraph(
         drawHighlightMark(context, theme, highlightStyle, cursorX, baselineY, tokenWidth, activeFontSize);
       }
       context.save();
-      const weight = isSubheading ? 600 : token.mark ? 600 : token.bold ? 500 : isQuote ? 400 : 300;
+      const weight = isSubheading
+        ? SUBHEADING_TEXT_WEIGHT
+        : token.bold
+          ? BODY_BOLD_WEIGHT
+          : isQuote
+            ? QUOTE_TEXT_WEIGHT
+            : BODY_TEXT_WEIGHT;
       context.globalCompositeOperation = isDarkPosterTheme(theme) ? "screen" : "multiply";
       context.font = `${weight} ${activeFontSize}px ${BODY_FONT_FAMILY}`;
       context.fillStyle = isSubheading && subheadingStyle === "accent" ? theme.palette.accent : theme.palette.text;
