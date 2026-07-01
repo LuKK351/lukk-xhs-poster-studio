@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${PATH:-}"
+export PATH="${HOME:-}/.local/share/fnm/aliases/default/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${PATH:-}"
 
 APP_DIR="$(cd "$(dirname "$0")" && pwd)"
 PORT=3000
